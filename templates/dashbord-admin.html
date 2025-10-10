@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+    <link rel="icon" type="image/png" href="../static/img/Logo-aba.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/responsivo.css">
+    <title>Dashbord Admin</title>
+</head>
+
+<body>
+
+    <header class="sem-login page-header">
+        <img alt="Logo da Stand" class="logo" src="../static/img/stand.png">
+
+
+        <button class="menu-hamburguer" id="btnMenu" aria-label="Abrir menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+
+        <nav class="menu-mobile menu-mobile-dashboard" id="menuMobile">
+            <div class="scroll">
+                <ul>
+                    <li><a class="active-mobile" href="{{ url_for('dashbordadmin') }}">Início</a></li>
+                    <li><a href="{{ url_for('adminalunoslista') }}">Alunos</a></li>
+                    <li><a href="{{ url_for('adminprofessoreslista') }}">Professores</a></li>
+                    <li><a href="{{ url_for('adminadmlista') }}">Admins</a></li>
+                    <li><a href="{{ url_for('adminadicionarusuario') }}">Cadastar Usuario</a></li>
+                    <li><a href="{{ url_for('adminaulaslista') }}">Aulas</a></li>
+                    <li><a href="{{ url_for('adminavisos') }}">Avisos</a></li>
+                </ul>
+                <div class="perfil">
+                    <img src="../static/img/admin.png" alt="Ícone do admin">
+                    <p>Admin</p>
+                    <nav>
+                        <a href="{{ url_for('admineditarconta') }}" class="btn">Editar conta</a>
+                        <a href="{{ url_for('index') }}" class="btn ">Sair</a>
+                    </nav>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+
+    <main class="dashboard"> 
+        </section>
+        <aside class="container-dashboard">
+            <div class="dashboar-botoes">
+                <ul>
+                    <li><a class="active" href="{{ url_for('dashbordadmin') }}">Início</a></li>
+                    <li><a href="{{ url_for('adminalunoslista') }}">Alunos</a></li>
+                    <li><a href="{{ url_for('adminprofessoreslista') }}">Professores</a></li>
+                    <li><a href="{{ url_for('adminadmlista') }}">Admins</a></li>
+                    <li><a href="{{ url_for('adminadicionarusuario') }}">Cadastar Usuario</a></li>
+                    <li><a href="{{ url_for('adminaulaslista') }}">Aulas</a></li>
+                    <li><a href="{{ url_for('adminavisos') }}">Avisos</a></li>
+                </ul>
+            </div>
+
+            <div class="perfil">
+                <img src="../static/img/admin.png" alt="Ícone do admin">
+                <p>Admin</p>
+                <nav>
+                    <a href="{{ url_for('admineditarconta') }}" class="btn">Editar conta</a>
+                    <a href="{{ url_for('index') }}" class="btn ">Sair</a>
+                </nav>
+            </div>
+        </aside>
+
+        <section class="main-content">
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% if mensagens %}
+            {% for categoria, msg in mensagens %}
+            <section class="flash_{{ 'bom' if categoria == 'success' else 'erro' }}">
+                <div class="mensagens">
+                    <p>{{ msg }}</p>
+                </div>
+            </section>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <header>
+                <h1>Bem-vindo!</h1>
+                <h2>Aqui estão algumas informações gerais</h2>
+            </header>
+            <div class="info-grid">
+                <div class="info-card">
+                    <p>Alunos cadastrados</p>
+                    <div class="card-data">
+                        <img src="../static/img/alunos%20cadastrados.png" alt="ícone alunos">
+                        <span>{{ total_alunos }}</span>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <p>Admin cadastrados</p>
+                    <div class="card-data">
+                        <img src="../static/img/admin%20cadastrados.png" alt="ícone admin">
+                        <span>{{ total_admins }}</span>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <p>Professores cadastrados</p>
+                    <div class="card-data">
+                        <img src="../static/img/yoga%20icon.png" alt="ícone professores">
+                        <span>{{ total_professores }}</span>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <p>Aulas agendadas</p>
+                    <div class="card-data">
+                        <img src="../static/img/aulas%20agendadas.png" alt="ícone aulas">
+                        <span>0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="alinhaitem page-footer">
+        <img class="logotop" src="../static/img/stand.png" alt="Logo">
+        <div class="linha"></div>
+        <p>Siga a Stand</p>
+        <div class="imagens">
+            <a href="https://web.whatsapp.com/"><img class="um" src="../static/img/whatzapp.png"
+                    alt="Logo whatzapp"></a>
+            <a href="https://www.facebook.com/"><img class="um" src="../static/img/facebook.png"
+                    alt="Logo facebook"></a>
+            <a href="https://www.instagram.com/"><img class="um" src="../static/img/instagram.png"
+                    alt="Logo instagram"></a>
+            <a href="https://www.youtube.com/"><img class="um" src="../static/img/youtube.png" alt="Logo youtube"></a>
+            <a href="https://web.telegram.org/"><img class="um" src="../static/img/telegram.png"
+                    alt="Logo telegram"></a>
+        </div>
+        <div class="linha"></div>
+    </footer>
+    <script src="../static/js/app.js"></script>
+</body>
+
+</html>

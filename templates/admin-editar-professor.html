@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br" dir="ltr">
+<head>
+  <link rel="icon" type="image/png" href="../static/img/Logo-aba.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/responsivo.css">
+    <title>Editar conta do Admin</title>
+</head>
+<body>
+<header class="sem-login">
+<img alt="Logo da Stand" class="logo" src="../static/img/stand.png">
+</header>
+<main>
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+        {% for categoria, msg in mensagens %}
+        <section class="flash_{{ 'bom' if categoria == 'success' else 'erro' }}">
+            <div class="mensagens">
+                <p>{{ msg }}</p>
+            </div>
+        </section>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+<form action="{{ url_for('admineditarprofessor', id=id) }}" method="post" class="formulario">
+    <h1>O que deseja mudar?</h1>
+    <input type="text" id="nome" name="nome" placeholder="Digite seu Nome" value="{{ nome }}" required>
+    <input type="email" id="email" name="email" placeholder="Digite seu Email" value="{{ email }}" required>
+    <input type="tel" maxlength="30" id="telefone" name="telefone" placeholder="Digite seu Telefone" value="{{ telefone }}" required>
+    <input type="text" id="especialidade" name="especialidade" placeholder="Especialidade" value="{{ especialidade }}" required>
+    <input type="password" id="senha" name="senha" placeholder="Digite sua nova senha">
+    <input type="password" id="confsenha" name="confsenha" placeholder="Confirme sua nova senha">
+    <a href="{{ url_for('adminprofessoreslista') }}">Cancelar</a>
+    <button type="submit" class="salvar">Salvar</button>
+</form>
+</main> 
+
+<footer class="alinhaitem">
+  <img class="logotop" src="../static/img/stand.png" alt="Logo">
+  
+  <div class="linha"></div>
+  
+  <p>Siga a Stand</p>
+  
+  <div class="imagens">
+    <a href="https://web.whatsapp.com/"><img class="um" src="../static/img/whatzapp.png" alt="Logo whatzapp"></a>
+    <a href="https://www.facebook.com/"><img class="um" src="../static/img/facebook.png" alt="Logo facebook"></a>
+    <a href="https://www.instagram.com/"><img class="um" src="../static/img/instagram.png" alt="Logo instagram"></a>
+    <a href="https://www.youtube.com/"><img class="um" src="../static/img/youtube.png" alt="Logo youtube"></a>
+    <a href="https://web.telegram.org/"><img class="um" src="../static/img/telegram.png" alt="Logo telegram"></a>
+  </div>
+  
+  <div class="linha"></div> 
+</footer>
+</body>
+</html>

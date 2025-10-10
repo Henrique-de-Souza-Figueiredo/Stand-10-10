@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br" dir="ltr">
+
+<head>
+    <link rel="icon" type="image/png" href="../static/img/Logo-aba.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/responsivo.css">
+    <title>Stand</title>
+</head>
+
+<body>
+    <header class="sem-login">
+        <img class="logo" alt="Logo da Stand" src="../static/img/stand.png">
+    </header>
+    <main>
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+        {% for categoria, msg in mensagens %}
+        <section class="flash_{{ 'bom' if categoria == 'success' else 'erro' }}">
+            <div class="mensagens">
+                <p>{{ msg }}</p>
+            </div>
+        </section>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+<form class="formulario" method="POST" action="{{ url_for('adminadicionarusuario') }}">
+  <h1>Adicionar Usuário</h1>
+
+  <select name="tipos" id="tipo-selecao" required>
+    <option value="1">Aluno</option>
+    <option value="2">Professor</option>
+    <option value="3">Admin</option>
+  </select>
+  <input type="text" name="nome" placeholder="Digite o Nome" required>
+  <input type="email" name="email" placeholder="Digite o Email" required>
+  <input type="text" maxlength="30" name="telefone" placeholder="Digite o Telefone" required>
+  <input type="text" name="especialidade" placeholder="Especialidade" id="campo-especialidade">
+  <input type="password" name="senha" placeholder="Crie a Senha" required>
+  <input type="password" name="confsenha" placeholder="Confirme a Senha" required>
+  <button type="button" class="cancelar"><a href="{{ url_for('dashbordadmin') }}">Cancelar</a></button>
+  <button type="submit">Cadastrar</button>
+</form>
+    </main>
+    <footer class="alinhaitem">
+        <img class="logotop" src="../static/img/stand.png" alt="Logo">
+
+        <div class="linha"></div>
+
+        <p>Siga a Stand</p>
+
+        <div class="imagens">
+            <a href="https://web.whatsapp.com/"><img class="um" src="../static/img/whatzapp.png" alt="Logo whatzapp"></a>
+            <a href="https://www.facebook.com/"><img class="um" src="../static/img/facebook.png" alt="Logo facebook"></a>
+            <a href="https://www.instagram.com/"><img class="um" src="../static/img/instagram.png" alt="Logo instagram"></a>
+            <a href="https://www.youtube.com/"><img class="um" src="../static/img/youtube.png" alt="Logo youtube"></a>
+            <a href="https://web.telegram.org/"><img class="um" src="../static/img/telegram.png" alt="Logo telegram"></a>
+        </div>
+
+        <div class="linha"></div>
+    </footer>
+
+    <script src="../static/js/adiconarusu.js"></script>

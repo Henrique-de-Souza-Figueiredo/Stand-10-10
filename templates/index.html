@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br" dir="ltr">
+
+<head>
+    <link rel="icon" type="image/png" href="../static/img/Logo-aba.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/responsivo.css">
+    <title>Stand</title>
+</head>
+<body>
+    <header class="sem-login">
+
+        <img alt="Logo da Stand" class="logo" src="../static/img/stand.png">
+
+        <nav class="nav-sem-login">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('login') }}">Login</a>
+            <a class="cadastar-se" href="{{ url_for('cadastro') }}" >Cadastrar-se</a>
+        </nav>
+
+        <button class="menu-hamburguer" id="btnMenu" aria-label="Abrir menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+
+        <nav class="menu-mobile" id="menuMobile">
+
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a class="cadastar-se" href="{{ url_for('cadastro') }}">Cadastar</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+        {% for categoria, msg in mensagens %}
+        <section class="flash_{{ 'bom' if categoria == 'success' else 'erro' }}">
+            <div class="mensagens">
+                <p>{{ msg }}</p>
+            </div>
+        </section>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="main-banner">
+            <img alt="Banner principal da Stand" class="banner" src="../static/img/home-banner.jpg">
+            <h1>O <span class="enfase">sistema de academia</span> com alta <span class="enfase">tecnologia</span> e
+                <span class="enfase">performance</span>
+            </h1>
+        </div>
+
+        <section class="quem-somos">
+            <div class="texto-container">
+                <h5>Quem Somos Nós?</h5>
+                <p>A Stand nasceu da paixão pelo fitness e da compreensão dos reais desafios de gerir uma academia. Nós
+                    não somos apenas uma empresa de tecnologia; somos especialistas que acreditam que o seu sucesso vai
+                    além da sua performance.</p>
+            </div>
+
+            <div class="imagem-container">
+                <img alt="Imagem Quem Somos" src="../static/img/quem%20somos.jpg">
+            </div>
+        </section>
+
+        <section class="porquenosescolher">
+            <h5>Por que nos escolher?</h5>
+
+            <div class="cartoes-container">
+                <div class="cartao">
+                    <img src="../static/img/engrenagem.png" alt="Ícone de engrenagem">
+                    <h4>Fácil controle</h4>
+                    <p>Nosso sistema é intuitivo e de fácil entendimento, tornando a gestão da sua academia muito mais
+                        simples.</p>
+                </div>
+
+                <div class="cartao">
+                    <img src="../static/img/deslizar.png" alt="Ícone de sistema intuitivo">
+                    <h4>Sistema intuitivo</h4>
+                    <p>Plataforma fácil de usar, tanto para gestores quanto para alunos, com acesso rápido a todas as
+                        informações.</p>
+                </div>
+
+                <div class="cartao">
+                    <img src="../static/img/celular.png" alt="Ícone de celular">
+                    <h4>Acesso simples</h4>
+                    <p>Sistema disponível no computador ou celular para você acessar de onde precisar.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="vejanossasaulas">
+            <h5>Veja nossas Aulas</h5>
+
+            <div class="aulas-container">
+                <div class="aula-card">
+                    <img class="aula-imagem" src="../static/img/yoga.png" alt="Mulher praticando Yoga">
+                    <div class="aula-info">
+                        <div class="aula-titulo">
+                            <img class="aula-icone" src="../static/img/yoga icon.png" alt="Mulher praticando Yoga">
+                            <h6>Yoga</h6>
+                        </div>
+                        <p>Uma prática que combina posturas, respiração e meditação para melhorar a flexibilidade,
+                            reduzir o estresse e fortalecer o corpo e a mente.</p>
+                    </div>
+                </div>
+
+                <div class="aula-card">
+                    <img class="aula-imagem" src="../static/img/Spinning.png" alt="Homem praticando Spinning">
+                    <div class="aula-info">
+                        <div class="aula-titulo">
+                            <img class="aula-icone" src="../static/img/Spinning icon.png" alt="Prática de Spinning">
+                            <h6>Spinning</h6>
+                        </div>
+                        <p>Aula intensa de ciclismo indoor que trabalha resistência, força e cardio, ajudando a queimar
+                            calorias e melhorar o condicionamento físico.</p>
+                    </div>
+                </div>
+
+                <div class="aula-card">
+                    <img class="aula-imagem" src="../static/img/zumba.jpg" alt="Grupo de pessoas praticando Zumba">
+                    <div class="aula-info">
+                        <div class="aula-titulo">
+                            <img class="aula-icone" src="../static/img/zumba icon.png" alt="">
+                            <h6>Zumba</h6>
+                        </div>
+                        <p>Treino divertido baseado em dança, que mistura ritmos latinos e exercícios aeróbicos,
+                            promovendo condicionamento físico e muita energia.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="comentarios">
+            <h5>O que nossos clientes dizem?</h5>
+
+            <div class="comentarios-container">
+
+                <div class="comentario-card">
+                    <div class="card-header">
+                        <img class="user-icon" src="../static/img/user.png" alt="Ícone de usuário">
+                        <h6>Eduarda Silva</h6>
+                    </div>
+                    <p>O Stand tornou a gestão da minha academia muito mais prática e organizada. Recomendo!</p>
+                    <img class="estrela" src="../static/img/5 estrela.png" alt="Avaliação de 5 estrelas">
+                </div>
+
+                <div class="comentario-card">
+                    <div class="card-header">
+                        <img class="user-icon" src="../static/img/user.png" alt="Ícone de usuário">
+                        <h6>Matheus Lopes</h6>
+                    </div>
+                    <p>Fácil de usar, intuitivo e eficiente. Me ajudou a acompanhar os alunos de forma rápida e prática.
+                    </p>
+                    <img class="estrela" src="../static/img/5 estrela.png" alt="Avaliação de 5 estrelas">
+                </div>
+
+                <div class="comentario-card">
+                    <div class="card-header">
+                        <img class="user-icon" src="../static/img/user.png" alt="Ícone de usuário">
+                        <h6>Maicon Carvalho</h6>
+                    </div>
+                    <p>Ótimo sistema! Consegui controlar treinos e matrículas sem complicações, para quem precisa ter
+                        controle na rotina.</p>
+                    <img class="estrela" src="../static/img/5 estrela.png" alt="Avaliação de 5 estrelas">
+                </div>
+
+            </div>
+        </section>
+
+        <section class="tenhacontrole">
+
+            <div class="controle-texto">
+                <h5>Tenha tudo sobre<br>controle</h5>
+                <ul class="lista-features">
+                    <li><img src="../static/img/concluido.png" alt="Ícone de check"> Gestão simples</li>
+                    <li><img src="../static/img/concluido.png" alt="Ícone de check"> Controle de turma</li>
+                    <li><img src="../static/img/concluido.png" alt="Ícone de check"> Acessibilidade para celular</li>
+                    <li><img src="../static/img/concluido.png" alt="Ícone de check"> Interface dinâmica</li>
+                    <li><img src="../static/img/concluido.png" alt="Ícone de check"> E muito mais!</li>
+                </ul>
+            </div>
+
+            <div class="controle-imagem">
+                <img alt="Mulher comemorando com um laptop em frente a um círculo verde"
+                    src="../static/img/tudo sobre controle.png">
+            </div>
+
+        </section>
+
+        <section class="cta-final">
+            <h6>Agora que já nos conhece...</h6>
+            <a href="{{ url_for('cadastro') }}" class="btn-cta">Venha fazer parte!</a>
+        </section>
+
+
+
+
+        <footer class="alinhaitem">
+            <img class="logotop" src="../static/img/stand.png" alt="Logo">
+
+            <div class="linha"></div>
+
+            <p>Siga a Stand</p>
+
+         <div class="imagens">
+      <a href="https://web.whatsapp.com/"><img class="um" src="../static/img/whatzapp.png" alt="Logo whatzapp"></a>
+      <a href="https://www.facebook.com/"><img class="um" src="../static/img/facebook.png" alt="Logo facebook"></a>
+      <a href="https://www.instagram.com/"><img class="um" src="../static/img/instagram.png" alt="Logo instagram"></a>
+      <a href="https://www.youtube.com/"><img class="um" src="../static/img/youtube.png" alt="Logo youtube"></a>
+      <a href="https://web.telegram.org/"><img class="um" src="../static/img/telegram.png" alt="Logo telegram"></a>
+    </div>
+
+            <div class="linha"></div>
+        </footer>
+
+    </main>
+    <script src="../static/js/app.js"></script>
+</body>
+
+</html>
