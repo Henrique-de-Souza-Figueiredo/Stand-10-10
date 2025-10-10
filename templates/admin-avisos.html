@@ -98,8 +98,8 @@
                         <p class="item-descricao">{{ aviso[2] }}</p>
                     </div>
                     <div class="item-actions">
-                        <a href="{{ url_for('adminexcluiraviso') }}" class="btn btn-deletar">Excluir Aviso</a>
-                        <a href="{{ url_for('adminexcluiraviso') }}" class="btn btn-editar">Editar Aviso</a>
+                        <a href="{{ url_for('adminexcluiraviso', id=aviso[0]) }}" class="btn btn-deletar">Excluir Aviso</a>
+                        <a href="{{ url_for('admineditaraviso', id=aviso[0]) }}" class="btn btn-editar">Editar Aviso</a>
                     </div>
                 </li>
             </ul>

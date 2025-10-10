@@ -60,7 +60,14 @@ def alunoavisos():
     if session.get('tipo') != 1:
         flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
         return redirect(url_for('login'))
-    return render_template('aluno-avisos.html', titulo='Dashboard aluno')
+
+    cursor = con.cursor()
+    cursor.execute("select id_aviso, titulo, descricao from AVISO")
+    avisoli = cursor.fetchall()
+    cursor.close()
+
+    return render_template('aluno-avisos.html', avisoli=avisoli, titulo='Dashboard aluno lista aviso')
+
 
 @app.route('/alunoaulaslista')
 def alunoaulaslista():
@@ -740,7 +747,7 @@ def adminavisos():
     return render_template('admin-avisos.html', avisoli=avisoli, titulo='Dashboard admin lista aluno')
 
 
-@app.route('/adminadicionaraviso')
+@app.route('/adminadicionaraviso', methods=['POST','GET'])
 def adminadicionaraviso():
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
@@ -758,15 +765,14 @@ def adminadicionaraviso():
         cursor.execute("INSERT INTO aviso (titulo, descricao) VALUES (?, ?)", (titulo, descricao))
         con.commit()
         cursor.close()
-
         flash('Aviso adicionado com sucesso!', 'success')
-        return redirect(url_for('adminavisos'))  # volta para a lista de avisos
+        return redirect(url_for('adminavisos'))
 
     return render_template('admin-adicionar-aviso.html', titulo='Adicionar Aviso')
 
 
-@app.route('/adminexcluiraviso')
-def adminexcluiraviso():
+@app.route('/adminexcluiraviso/<int:id>', methods=['GET', 'POST'])
+def adminexcluiraviso(id):
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
         return redirect(url_for('login'))
@@ -774,7 +780,63 @@ def adminexcluiraviso():
     if session.get('tipo') != 3:
         flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
         return redirect(url_for('login'))
-    return render_template('admin-excluir-aviso.html', titulo='Dashboard admin excluir avisos')
+
+    cursor = con.cursor()
+
+    if request.method == 'GET':
+        # Busca o aviso pelo ID e mostra a tela de confirmação
+        cursor.execute("SELECT id_aviso, titulo, descricao FROM aviso WHERE id_aviso = ?", (id,))
+        aviso = cursor.fetchone()
+        cursor.close()
+
+        if not aviso:
+            flash("Aviso não encontrado.", "erro")
+            return redirect(url_for('adminavisos'))
+
+        return render_template('admin-excluir-aviso.html', aviso=aviso)
+
+    # Se for POST, realmente exclui
+    cursor.execute("DELETE FROM aviso WHERE id_aviso = ?", (id,))
+    con.commit()
+    cursor.close()
+
+    flash("Aviso excluído com sucesso!", "success")
+    return redirect(url_for('adminavisos'))
+
+
+@app.route('/admineditaraviso/<int:id>', methods=['GET', 'POST'])
+def admineditaraviso(id):
+    if 'id_usuario' not in session or session.get('tipo') != 3:
+        flash('Acesso negado.', 'erro')
+        return redirect(url_for('login'))
+
+    cursor = con.cursor()
+
+    # Busca os dados atuais do aviso
+    cursor.execute("SELECT titulo, descricao FROM aviso WHERE id_aviso = ?", (id,))
+    aviso = cursor.fetchone()
+
+    if not aviso:
+        cursor.close()
+        flash('Aviso não encontrado.', 'erro')
+        return redirect(url_for('adminavisos'))
+
+    titulo_atual, descricao_atual = aviso
+
+    if request.method == 'POST':
+        titulo = request.form['titulo']
+        descricao = request.form['descricao']
+
+        cursor.execute("UPDATE aviso SET titulo = ?, descricao = ? WHERE id_aviso = ?",
+                       (titulo, descricao, id))
+        con.commit()
+        cursor.close()
+
+        flash('Aviso atualizado com sucesso!', 'success')
+        return redirect(url_for('adminavisos'))
+
+    cursor.close()
+    return render_template('admin-editar-aviso.html', titulo_aviso=titulo_atual, descricao_aviso=descricao_atual, id=id)
 
 
 @app.route('/admineditarconta', methods=['GET', 'POST'])
@@ -952,7 +1014,13 @@ def professoravisos():
     if session.get('tipo') != 2:
         flash('Acesso negado. Apenas professores podem editar sua conta.', 'erro')
         return redirect(url_for('login'))
-    return render_template('professor-avisos.html', titulo='Dashboard professor avisos')
+
+    cursor = con.cursor()
+    cursor.execute("select id_aviso, titulo, descricao from AVISO")
+    avisoli = cursor.fetchall()
+    cursor.close()
+
+    return render_template('professor-avisos.html', avisoli=avisoli, titulo='Dashboard professor lista aviso')
 
 @app.route('/professoralunosmatriculados')
 def professoralunosmatriculados():

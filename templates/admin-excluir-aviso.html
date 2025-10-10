@@ -28,13 +28,15 @@
         {% endif %}
         {% endwith %}
     <div class="container-excluir">
-      <h1>Realmente deseja excluir esse aviso ?</h1>
+  <h1>Realmente deseja excluir esse aviso?</h1>
 
-      <div class="botoes-excluir">
-        <a class="btn-confirm btn-nao" href="{{ url_for('adminavisos') }}" >Não</a>
-        <a class="btn-confirm btn-sim" href="{{ url_for('adminavisos') }}" >Sim</a>
-      </div>
-    </div>
+  <div class="botoes-excluir">
+    <a class="btn-confirm btn-nao" href="{{ url_for('adminavisos') }}">Não</a>
+    <form action="{{ url_for('adminexcluiraviso', id=aviso[0]) }}" method="POST">
+      <button type="submit" class="btn-confirm btn-sim">Sim</button>
+    </form>
+  </div>
+</div>
   </main>
 
   <footer class="alinhaitem">

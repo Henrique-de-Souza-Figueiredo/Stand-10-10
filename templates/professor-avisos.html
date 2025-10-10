@@ -79,18 +79,19 @@
             <div class="lista-header">
                 <h1>Avisos</h1>
             </div>
-
+            <div class="lista-scroll">
+            {% for aviso in avisoli %}
             <ul>
-
                 <li class="lista-item">
                     <div class="item-texto">
-                        <p class="item-name">Aula de zumba cancelada</p>
-                        <p class="item-descricao">A aula de zumba do dia 24 (quarta-feira) foi cancelada, pois o
-                            professor está doente.</p>
+                        <p class="id">{{ aviso[0] }}</p>
+                        <p class="item-name">{{ aviso[1] }}</p>
+                        <p class="item-descricao">{{ aviso[2] }}</p>
                     </div>
-
                 </li>
             </ul>
+            {% endfor %}
+            </div>
         </div>
 
     </main>
