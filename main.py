@@ -18,6 +18,11 @@ con = fdb.connect(host=host, database=database, user=user, password=password)
 def index():
     return render_template('index.html', titulo='Pagina inicial')
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('Você saiu da sua conta.', 'success')
+    return redirect(url_for('index'))
 
 @app.route('/cadastro')
 def cadastro():
