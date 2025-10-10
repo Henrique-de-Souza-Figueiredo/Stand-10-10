@@ -88,21 +88,23 @@
                 <h1>Avisos</h1>
                 <a href="{{ url_for('adminadicionaraviso') }}" class="btn btn-adicionar">Adicionar +</a>
             </div>
-
+            <div class="lista-scroll">
+            {% for aviso in avisoli %}
             <ul>
-
                 <li class="lista-item">
                     <div class="item-texto">
-                        <p class="item-name">Aula de zumba cancelada</p>
-                        <p class="item-descricao">A aula de zumba do dia 24 (quarta-feira) foi cancelada, pois o
-                            professor está doente.</p>
+                        <p class="id">{{ aviso[0] }}</p>
+                        <p class="item-name">{{ aviso[1] }}</p>
+                        <p class="item-descricao">{{ aviso[2] }}</p>
                     </div>
-
                     <div class="item-actions">
                         <a href="{{ url_for('adminexcluiraviso') }}" class="btn btn-deletar">Excluir Aviso</a>
+                        <a href="{{ url_for('adminexcluiraviso') }}" class="btn btn-editar">Editar Aviso</a>
                     </div>
                 </li>
             </ul>
+            {% endfor %}
+            </div>
         </div>
 
 

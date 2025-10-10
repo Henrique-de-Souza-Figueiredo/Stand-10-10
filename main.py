@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'senhastandsi,teacademia'
 
 host = 'localhost'
-database = r'C:\Users\Aluno\Documents\Stand-10-10\BANCO.FDB'
+database = r'C:\Users\Aluno\Downloads\BANCO (1)\BANCO.FDB'
 user = 'sysdba'
 password = 'sysdba'
 
@@ -732,7 +732,12 @@ def adminavisos():
     if session.get('tipo') != 3:
         flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
         return redirect(url_for('login'))
-    return render_template('admin-avisos.html', titulo='Dashboard admin avisos lista')
+
+    cursor = con.cursor()
+    cursor.execute("select id_aviso, titulo, descricao from AVISO")
+    avisoli = cursor.fetchall()
+    cursor.close()
+    return render_template('admin-avisos.html', avisoli=avisoli, titulo='Dashboard admin lista aluno')
 
 
 @app.route('/adminadicionaraviso')
@@ -744,7 +749,20 @@ def adminadicionaraviso():
     if session.get('tipo') != 3:
         flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
         return redirect(url_for('login'))
-    return render_template('admin-adicionar-avisos.html', titulo='Dashboard admin adicionar avisos')
+
+    if request.method == 'POST':
+        titulo = request.form['titulo']
+        descricao = request.form['descricao']
+
+        cursor = con.cursor()
+        cursor.execute("INSERT INTO aviso (titulo, descricao) VALUES (?, ?)", (titulo, descricao))
+        con.commit()
+        cursor.close()
+
+        flash('Aviso adicionado com sucesso!', 'success')
+        return redirect(url_for('adminavisos'))  # volta para a lista de avisos
+
+    return render_template('admin-adicionar-aviso.html', titulo='Adicionar Aviso')
 
 
 @app.route('/adminexcluiraviso')
