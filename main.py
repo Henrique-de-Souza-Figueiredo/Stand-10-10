@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'senhastandsi,teacademia'
 
 host = 'localhost'
-database = r'C:\Users\Aluno\Downloads\BANCO (1)\BANCO.FDB'
+database = r'C:\Users\Aluno\Documents\Stand-10-10\BANCO.FDB'
 user = 'sysdba'
 password = 'sysdba'
 
@@ -191,8 +191,12 @@ def adminalunoslista():
 @app.route('/adminresetartentativas', methods=['POST'])
 def adminresetartentativas():
     # Verifica se o usuário está logado e é admin
-    if 'id_usuario' not in session or session.get('tipo') != 3:
-        flash('Acesso negado.', 'erro')
+    if 'id_usuario' not in session:
+        flash('Você precisa estar logado para acessar essa página.', 'erro')
+        return redirect(url_for('login'))
+
+    if session.get('tipo') != 3:
+        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
         return redirect(url_for('login'))
 
     # Pega o id do usuário enviado pelo formulário
