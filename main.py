@@ -464,7 +464,7 @@ def adminadmlista():
     id_admin_logado = session['id_usuario']
 
     cursor = con.cursor()
-    cursor.execute("SELECT id_usuario, nome, email, tentativas FROM usuario WHERE tipo = 3 AND id_usuario != ?", (id_admin_logado))
+    cursor.execute("SELECT id_usuario, nome, email, tentativas FROM usuario WHERE tipo = 3 AND id_usuario != ?", (id_admin_logado,))
     admli = cursor.fetchall()
     cursor.close()
 
@@ -661,16 +661,39 @@ def adminaulaslista():
     return render_template('admin-aulas-listas.html', titulo='Dashboard admin aulas lista')
 
 
-@app.route('/adminadicionaraula')
+@app.route('/adminadicionaraula', methods=['GET', 'POST'])
 def adminadicionaraula():
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
+        flash('Acesso negado. Somente administradores nessa página', 'erro')
         return redirect(url_for('login'))
-    return render_template('admin-adicionar-aula.html', titulo='Dashboard admin adicionar aula')
+
+    cursor = con.cursor()
+    # Buscar lista de professores
+    cursor.execute("SELECT ID_USUARIO, NOME FROM USUARIO WHERE TIPO = 2")
+    professores = cursor.fetchall()
+
+    if request.method == 'POST':
+        nome = request.form['nome']
+        descricao = request.form.get('descricao')
+        data_aula = request.form['data_aula']
+        horario = request.form['horario']
+        capacidade = request.form.get('capacidade')
+        capacidade = int(capacidade) if capacidade else None
+        professor_id = request.form['professor_id']
+        modalidade = request.form['modalidade']
+
+        cursor.execute("INSERT INTO AULA (NOME, DESCRICAO, DATA_AULA, HORARIO, CAPACIDADE, PROFESSOR_ID, MODALIDADE) " "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (nome, descricao, data_aula, horario, capacidade, professor_id, modalidade))
+
+        con.commit()
+        flash('Aula adicionada com sucesso!', 'sucesso')
+
+    cursor.close()
+    return render_template('admin-adicionar-aula.html', professores=professores, titulo='Dashboard admin adicionar aula')
 
 
 @app.route('/adminalunosmatriculados')

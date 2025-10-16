@@ -26,17 +26,31 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-    <form class="formulario">
-      <h1>Adicionar aula</h1>
-      <select type="text" placeholder="Professor">
-        <option value=""></option>
-      <input type="date" placeholder="Data">
-      <input type="datetime" placeholder="Horário">
-      <input type="text" placeholder="Modalidade">
-      <input type="number" placeholder="Vagas">
-      <button class="cancelar"><a href="{{ url_for('adminaulaslista') }}">Cancelar</a></button>
-      <button class="cadastrar"><a href="{{ url_for('adminaulaslista') }}">Adicionar</a></button>
-    </form>
+<form class="formulario" method="POST" action="{{ url_for('adminadicionaraula') }}">
+  <h1>Adicionar Aula</h1>
+
+  <input type="text" name="nome" placeholder="Nome da Aula" required>
+
+  <textarea name="descricao" placeholder="Descrição da Aula"></textarea>
+
+  <input type="date" name="data_aula" placeholder="Data" required>
+
+  <input type="time" name="horario" placeholder="Horário" required>
+
+  <input type="number" name="capacidade" placeholder="Vagas" min="1">
+
+  <select name="professor_id" required>
+  <option value="">Selecione o Professor</option>
+  {% for usuarios in professores %}
+    <option value="{{ professor[0] }}">{{ professor[1] }}</option>
+  {% endfor %}
+</select>
+
+  <input type="text" name="modalidade" placeholder="Modalidade" required>
+
+  <button type="submit" class="cadastrar">Adicionar</button>
+  <a href="{{ url_for('adminaulaslista') }}" class="cancelar">Cancelar</a>
+</form>
   </main>
 
 
