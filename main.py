@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'senhastandsi,teacademia'
 
 host = 'localhost'
-database = r'C:\Users\Aluno\Documents\Stand-10-10/BANCO.FDB'
+database = r'C:\Users\Aluno\Desktop\Stand-10-10\BANCO.FDB'
 user = 'sysdba'
 password = 'sysdba'
 
@@ -21,13 +21,11 @@ def index():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('Você saiu da sua conta.', 'success')
     return redirect(url_for('index'))
 
 @app.route('/cadastro')
 def cadastro():
     return render_template('cadastro.html', titulo='Novo usuario')
-
 
 @app.route('/alunodashbord')
 def alunodashbord():
@@ -36,7 +34,7 @@ def alunodashbord():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 1:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente alunos nessa pagina.', 'erro')
         return redirect(url_for('login'))
     return render_template('aluno-dashbord.html', titulo='Dashboard aluno')
 
@@ -47,7 +45,7 @@ def alunoprofessoreslista():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 1:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente alunos nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -63,7 +61,7 @@ def alunoavisos():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 1:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente alunos nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -81,7 +79,7 @@ def alunoaulaslista():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 1:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente alunos nessa pagina.', 'erro')
         return redirect(url_for('login'))
     return render_template('aluno-aulas-lista.html', titulo='Dashboard aluno')
 
@@ -92,7 +90,7 @@ def alunoeditarconta():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 1:
-        flash('Acesso negado. Somente aluno.', 'erro')
+        flash('Acesso negado. Somente alunos nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     idaluno = session['id_usuario']
@@ -164,7 +162,7 @@ def dashbordadmin():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -190,7 +188,7 @@ def adminalunoslista():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -208,7 +206,7 @@ def adminresetartentativas():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     # Pega o id do usuário enviado pelo formulário
@@ -232,7 +230,7 @@ def admineditaralunos(id):
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -301,7 +299,7 @@ def adminexcluiralunos(id):
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem excluir contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -334,7 +332,7 @@ def adminprofessoreslista():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -351,7 +349,7 @@ def admineditarprofessor(id):
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:  # tipo 3 = admin
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -422,7 +420,7 @@ def adminexcluirprofessor(id):
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem excluir contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -460,7 +458,7 @@ def adminadmlista():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem acessar essa página.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     id_admin_logado = session['id_usuario']
@@ -480,7 +478,7 @@ def admineditaradm(id):
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -549,7 +547,7 @@ def adminexluiradmin(id):
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem excluir contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -587,7 +585,7 @@ def adminadicionarusuario():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem adicionar usuários.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     if request.method == 'POST':
@@ -658,7 +656,7 @@ def adminaulaslista():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
     return render_template('admin-aulas-listas.html', titulo='Dashboard admin aulas lista')
 
@@ -670,7 +668,7 @@ def adminadicionaraula():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
     return render_template('admin-adicionar-aula.html', titulo='Dashboard admin adicionar aula')
 
@@ -682,7 +680,7 @@ def adminalunosmatriculados():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
     return render_template('admin-alunos-matriculados.html', titulo='Dashboard admin alunos matriculados')
 
@@ -694,7 +692,7 @@ def adminmatricularaluno():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
     return render_template('admin-matricular-aluno.html', titulo='Dashboard admin matricular aluno')
 
@@ -706,7 +704,7 @@ def adminexcluiralunoaula():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
     return render_template('admin-excluir-aluno-aula.html', titulo='Dashboard admin excluir aluno aula')
 
@@ -718,7 +716,7 @@ def admineditaraula():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
     return render_template('admin-editar-aula.html', titulo='Dashboard admin editar aula')
 
@@ -730,7 +728,7 @@ def adminexcluiraula():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
     return render_template('admin-excluir-aula.html', titulo='Dashboard admin excluir aula')
 
@@ -742,7 +740,7 @@ def adminavisos():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -759,7 +757,7 @@ def adminadicionaraviso():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
 
     if request.method == 'POST':
@@ -783,7 +781,7 @@ def adminexcluiraviso(id):
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -811,10 +809,13 @@ def adminexcluiraviso(id):
 
 @app.route('/admineditaraviso/<int:id>', methods=['GET', 'POST'])
 def admineditaraviso(id):
-    if 'id_usuario' not in session or session.get('tipo') != 3:
-        flash('Acesso negado.', 'erro')
+    if 'id_usuario' not in session:
+        flash('Você precisa estar logado para acessar essa página.', 'erro')
         return redirect(url_for('login'))
 
+    if session.get('tipo') != 3:
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
+        return redirect(url_for('login'))
     cursor = con.cursor()
 
     # Busca os dados atuais do aviso
@@ -850,8 +851,8 @@ def admineditarconta():
         flash('Você precisa estar logado para acessar essa página.', 'erro')
         return redirect(url_for('login'))
 
-    if session.get('tipo') != 3:  #
-        flash('Acesso negado. Somente administradores podem editar contas.', 'erro')
+    if session.get('tipo') != 3:
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
 
     idadmin = session['id_usuario']
@@ -871,7 +872,7 @@ def admineditarconta():
         cursor.execute('SELECT 1 FROM usuario WHERE email = ? AND id_usuario != ?', (email, idadmin))
         if cursor.fetchone():
             flash("Esse email já está cadastrado por outro usuário.", 'erro')
-            return redirect(url_for('alunoeditarconta'))
+            return redirect(url_for('admineditarconta'))
 
         if senha:
             maiusculo = minuscula = numero = caracterEspecial = False
@@ -924,7 +925,7 @@ def professordashbord():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 2:
-        flash('Acesso negado. Apenas professores podem editar sua conta.', 'erro')
+        flash('Acesso negado. Apenas professores nessa pagina.', 'erro')
         return redirect(url_for('login'))
     return render_template('professor-dashbord.html', titulo='Dashboard professor')
 
@@ -935,7 +936,7 @@ def professoreditarconta():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 2:
-        flash('Acesso negado. Apenas professores podem editar sua conta.', 'erro')
+        flash('Acesso negado. Apenas professores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     idprofessor = session['id_usuario']
@@ -1006,7 +1007,7 @@ def professoraulaslista():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 2:
-        flash('Acesso negado. Apenas professores podem editar sua conta.', 'erro')
+        flash('Acesso negado. Apenas professores nessa pagina.', 'erro')
         return redirect(url_for('login'))
     return render_template('professor-aulas-lista.html', titulo='Dashboard professor aulas lista')
 
@@ -1017,7 +1018,7 @@ def professoravisos():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 2:
-        flash('Acesso negado. Apenas professores podem editar sua conta.', 'erro')
+        flash('Acesso negado. Apenas professores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
     cursor = con.cursor()
@@ -1034,7 +1035,7 @@ def professoralunosmatriculados():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 2:
-        flash('Acesso negado. Apenas professores podem editar sua conta.', 'erro')
+        flash('Acesso negado. Apenas professores nessa pagina', 'erro')
         return redirect(url_for('login'))
     return render_template('professor-alunos-matriculados.html', titulo='Dashboard professor alunos matriculados')
 
@@ -1069,6 +1070,7 @@ def cadastrar():
 
     try:
         cursor = con.cursor()
+        #Seleciona o primeiro valor igual a email encontrado na tabela
         cursor.execute('SELECT 1 FROM usuario WHERE usuario.email= ?', (email,))
         if cursor.fetchone():
             flash("Esse email já está cadastrado", 'error')

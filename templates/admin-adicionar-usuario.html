@@ -39,8 +39,8 @@
   <input type="email" name="email" placeholder="Digite o Email" required>
   <input type="text" maxlength="30" name="telefone" placeholder="Digite o Telefone" required>
   <input type="text" name="especialidade" placeholder="Especialidade" id="campo-especialidade">
-  <input type="password" name="senha" placeholder="Crie a Senha" required>
-  <input type="password" name="confsenha" placeholder="Confirme a Senha" required>
+  <input type="password" minlength="8" maxlength="16" name="senha" placeholder="Crie a Senha" required>
+  <input type="password" minlength="8" maxlength="16" name="confsenha" placeholder="Confirme a Senha" required>
   <button type="button" class="cancelar"><a href="{{ url_for('dashbordadmin') }}">Cancelar</a></button>
   <button type="submit">Cadastrar</button>
 </form>
