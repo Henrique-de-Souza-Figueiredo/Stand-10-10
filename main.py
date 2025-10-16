@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'senhastandsi,teacademia'
 
 host = 'localhost'
-database = r'C:\Users\Aluno\Downloads\BANCO (1)\BANCO.FDB'
+database = r'C:\Users\Aluno\Documents\Stand-10-10/BANCO.FDB'
 user = 'sysdba'
 password = 'sysdba'
 
@@ -466,7 +466,7 @@ def adminadmlista():
     id_admin_logado = session['id_usuario']
 
     cursor = con.cursor()
-    cursor.execute("SELECT id_usuario, nome, email, tentativas FROM usuario WHERE tipo = 3 AND id_usuario != ?", (id_admin_logado,))
+    cursor.execute("SELECT id_usuario, nome, email, tentativas FROM usuario WHERE tipo = 3 AND id_usuario != ?", (id_admin_logado))
     admli = cursor.fetchall()
     cursor.close()
 
