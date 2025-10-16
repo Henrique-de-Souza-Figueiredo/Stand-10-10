@@ -26,31 +26,35 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+
 <form class="formulario" method="POST" action="{{ url_for('adminadicionaraula') }}">
   <h1>Adicionar Aula</h1>
 
+   <select id="professor_id" name="professor_id">
+    <option value="" data-especialidade="">Selecionar professor</option>
+    {% for professor in professores %}
+        <option value="{{ professor[0] }}" data-especialidade="{{ professor[2] }}">
+            {{ professor[1] }}
+        </option>
+    {% endfor %}
+</select>
+
   <input type="text" name="nome" placeholder="Nome da Aula" required>
 
-  <textarea name="descricao" placeholder="Descrição da Aula"></textarea>
+  <input type="text" maxlength="254" name="descricao" placeholder="Digite a Descrição" required>
 
   <input type="date" name="data_aula" placeholder="Data" required>
 
   <input type="time" name="horario" placeholder="Horário" required>
 
-  <input type="number" name="capacidade" placeholder="Vagas" min="1">
+  <input type="number" min="10"  max="20" name="capacidade" placeholder="Vagas" required>
 
-  <select name="professor_id" required>
-  <option value="">Selecione o Professor</option>
-  {% for usuarios in professores %}
-    <option value="{{ professor[0] }}">{{ professor[1] }}</option>
-  {% endfor %}
-</select>
-
-  <input type="text" name="modalidade" placeholder="Modalidade" required>
+  <input type="text" id="modalidade" name="modalidade" readonly required>
 
   <button type="submit" class="cadastrar">Adicionar</button>
-  <a href="{{ url_for('adminaulaslista') }}" class="cancelar">Cancelar</a>
+  <a href="{{ url_for('adminaulaslista') }}">Cancelar</a>
 </form>
+
   </main>
 
 
@@ -71,8 +75,7 @@
 
     <div class="linha"></div>
   </footer>
-
-
+  <script src="../static/js/adicionaraula.js"></script>
 </body>
 
 </html>

@@ -83,19 +83,22 @@
         {% endif %}
         {% endwith %}
             <div class="lista-header">
-                <h1>Lista de Alunos</h1>
-                <a href="{{ url_for('adminmatricularaluno') }}" class="btn btn-adicionar">Adicionar +</a>
+    <h1>Alunos Matriculados na Aula: {{ aula[0] }}</h1>
+</div>
+
+<div class="lista-scroll">
+    <ul>
+    {% for aluno in alunos %}
+        <li class="lista-item">
+            <div class="item-texto">
+                <p class="id">{{ aluno[0] }}</p>
+                <p class="item-name">{{ aluno[1] }}</p>
+                <p class="item-descricao">Data de inscrição: {{ aluno[2] }}</p>
             </div>
-
-            <ul>
-
-                <li class="lista-item">
-                    <p class="item-name">Lívia Santos</p>
-                    <div class="item-actions">
-                        <a href="{{ url_for('adminexcluiralunoaula') }}" class="btn btn-deletar">Desmatricular</a>
-                    </div>
-                </li>
-            </ul>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
         </div>
 
 

@@ -658,7 +658,14 @@ def adminaulaslista():
     if session.get('tipo') != 3:
         flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
-    return render_template('admin-aulas-listas.html', titulo='Dashboard admin aulas lista')
+
+    cursor = con.cursor()
+    # Seleciona todas as aulas com informações do professor
+    cursor.execute("SELECT A.ID_AULA, A.NOME, A.DESCRICAO, A.DATA_AULA, A.HORARIO, A.CAPACIDADE, U.NOME AS PROFESSOR, A.MODALIDADE FROM AULA A JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO ORDER BY A.DATA_AULA, A.HORARIO")
+    aulas = cursor.fetchall()
+    cursor.close()
+
+    return render_template('admin-aulas-listas.html', aulas=aulas, titulo='Dashboard admin lista aulas')
 
 
 @app.route('/adminadicionaraula', methods=['GET', 'POST'])
@@ -672,9 +679,9 @@ def adminadicionaraula():
         return redirect(url_for('login'))
 
     cursor = con.cursor()
-    # Buscar lista de professores
-    cursor.execute("SELECT ID_USUARIO, NOME FROM USUARIO WHERE TIPO = 2")
-    professores = cursor.fetchall()
+    # Buscar lista de professores com especialidade
+    cursor.execute("SELECT ID_USUARIO, NOME, ESPECIALIDADE FROM USUARIO WHERE TIPO = 2")
+    professores = cursor.fetchall()  # cada item: (id, nome, especialidade)
 
     if request.method == 'POST':
         nome = request.form['nome']
@@ -682,22 +689,27 @@ def adminadicionaraula():
         data_aula = request.form['data_aula']
         horario = request.form['horario']
         capacidade = request.form.get('capacidade')
-        capacidade = int(capacidade) if capacidade else None
         professor_id = request.form['professor_id']
-        modalidade = request.form['modalidade']
 
-        cursor.execute("INSERT INTO AULA (NOME, DESCRICAO, DATA_AULA, HORARIO, CAPACIDADE, PROFESSOR_ID, MODALIDADE) " "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        # Pega a modalidade do professor selecionado
+        cursor.execute("SELECT ESPECIALIDADE FROM USUARIO WHERE ID_USUARIO = ?", (professor_id,))
+        resultado = cursor.fetchone()
+        modalidade = resultado[0] if resultado else ''
+
+        # Inserir aula no banco
+        cursor.execute("INSERT INTO AULA (NOME, DESCRICAO, DATA_AULA, HORARIO, CAPACIDADE, PROFESSOR_ID, MODALIDADE) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (nome, descricao, data_aula, horario, capacidade, professor_id, modalidade))
 
         con.commit()
-        flash('Aula adicionada com sucesso!', 'sucesso')
+        cursor.close()
+        flash('Aula adicionada com sucesso!', 'success')
+        return redirect(url_for('adminaulaslista'))
 
     cursor.close()
     return render_template('admin-adicionar-aula.html', professores=professores, titulo='Dashboard admin adicionar aula')
 
-
-@app.route('/adminalunosmatriculados')
-def adminalunosmatriculados():
+@app.route('/adminalunosmatriculados/<int:aula_id>')
+def adminalunosmatriculados(aula_id):
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
         return redirect(url_for('login'))
@@ -705,7 +717,18 @@ def adminalunosmatriculados():
     if session.get('tipo') != 3:
         flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
-    return render_template('admin-alunos-matriculados.html', titulo='Dashboard admin alunos matriculados')
+
+    cursor = con.cursor()
+    # Pega dados da aula
+    cursor.execute("SELECT NOME FROM AULA WHERE ID = ?", (aula_id,))
+    aula = cursor.fetchone()
+
+    # Pega alunos inscritos
+    cursor.execute("SELECT U.ID_USUARIO, U.NOME, I.DATA_INSCRICAO FROM INSCRICAO I JOIN USUARIO U ON I.ALUNO_ID = U.ID_USUARIO WHERE I.AULA_ID = ?", (aula_id,))
+    alunos = cursor.fetchall()
+
+    cursor.close()
+    return render_template('admin-alunos-matriculados.html', aula=aula, alunos=alunos)
 
 
 @app.route('/adminmatricularaluno')

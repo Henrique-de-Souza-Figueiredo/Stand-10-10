@@ -84,24 +84,34 @@
         {% endif %}
         {% endwith %}
             <div class="lista-header">
-                <h1>Lista de aulas</h1>
+                <h1>Aulas</h1>
                 <a href="{{ url_for('adminadicionaraula') }}" class="btn btn-adicionar">Adicionar +</a>
             </div>
 
-            <ul>
+    <div class="lista-scroll">
+        {% for aula in aulas %}
+        <ul>
+            <li class="lista-item">
 
-                <li class="lista-item">
-                    <p class="item-name">Zumba das 8:00 as 9:00</p>
-                    <p class="item-name">02/10/2025</p>
-                    <div class="item-actions">
-                        <p class="vagas-info">(0/20)</p>
-                        <a href="{{ url_for('adminalunosmatriculados') }}" class="btn btn-ver">Alunos</a>
-                        <a href="{{ url_for('admineditaraula') }}" class="btn btn-editar">Editar Aula</a>
-                        <a href="{{ url_for('adminexcluiraula') }}" class="btn btn-deletar">Excluir Aula</a>
-                    </div>
-                </li>
-
-            </ul>
+                <div class="item-texto">
+                    <p class="id">{{ aula[0] }}</p>
+                    <p class="item-name">{{ aula[1] }}</p>
+                    <p class="item-descricao">{{ aula[2] }}</p>
+                    <p class="item-data">Data: {{ aula[3] }}</p>
+                    <p class="item-horario">Horário: {{ aula[4] }}</p>
+                    <p class="item-capacidade">Vagas: {{ aula[5] }}</p>
+                    <p class="item-professor">Professor: {{ aula[6] }}</p>
+                    <p class="item-modalidade">Modalidade: {{ aula[7] }}</p>
+                </div>
+                <div class="item-actions">
+                    <a href="{{ url_for('adminalunosmatriculados', id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                    <a href="{{ url_for('adminexcluiraula', id=aula[0]) }}" class="btn btn-deletar">Excluir Aula</a>
+                    <a href="{{ url_for('admineditaraula', id=aula[0]) }}" class="btn btn-editar">Editar Aula</a>
+                </div>
+            </li>
+        </ul>
+        {% endfor %}
+    </div>
         </div>
 
     </main>
@@ -123,7 +133,7 @@
 
         <div class="linha"></div>
     </footer>
-    <script src="../static/js/app.js"></script>
+    <script src="../static/js/app.js"></script>]
 </body>
 
 </html>
