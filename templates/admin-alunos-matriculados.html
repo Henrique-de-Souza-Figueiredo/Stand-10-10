@@ -83,22 +83,21 @@
         {% endif %}
         {% endwith %}
             <div class="lista-header">
-    <h1>Alunos Matriculados na Aula: {{ aula[0] }}</h1>
-</div>
-
-<div class="lista-scroll">
-    <ul>
-    {% for aluno in alunos %}
-        <li class="lista-item">
-            <div class="item-texto">
-                <p class="id">{{ aluno[0] }}</p>
-                <p class="item-name">{{ aluno[1] }}</p>
-                <p class="item-descricao">Data de inscrição: {{ aluno[2] }}</p>
+                <h1>Lista de Alunos matriculados</h1>
+                <a href="{{ url_for('adminaulaslista') }}" class="btn btn-deletar">Voltar</a>
             </div>
-        </li>
-    {% endfor %}
-    </ul>
-</div>
+            <div class="lista-scroll">
+            {% for usuario in alunosmatriculado %}
+            <ul>
+
+                <li class="lista-item">
+                    <p class="id">{{ usuario[0] }}</p>
+                <p><strong>Nome:</strong> {{ usuario[1] }}</p>
+                <p><strong>Email:</strong> {{ usuario[2] }}</p>
+                </li>
+            </ul>
+            {% endfor %}
+            </div>
         </div>
 
 

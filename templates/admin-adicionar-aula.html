@@ -45,11 +45,13 @@
 
   <input type="date" name="data_aula" placeholder="Data" required>
 
-  <input type="time" name="horario" placeholder="Horário" required>
+  <input type="time" name="horario" placeholder="Horário de inicio" required>
+
+  <input type="time" name="horario_final" placeholder="Horário de termino" required>
 
   <input type="number" min="10"  max="20" name="capacidade" placeholder="Vagas" required>
 
-  <input type="text" id="modalidade" name="modalidade" readonly required>
+  <input type="text" id="modalidade" name="modalidade" placeholder="Modalidade / Especialidade do professor" readonly required>
 
   <button type="submit" class="cadastrar">Adicionar</button>
   <a href="{{ url_for('adminaulaslista') }}">Cancelar</a>

@@ -27,14 +27,16 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-    <div class="container-excluir">
-      <h1>Realmente deseja excluir essa aula?</h1>
+    <form class="formulario" action="{{ url_for('adminexcluiraula', aula_id=aula_id) }}" method="POST">
+  <h1>Motivo do cancelamento</h1>
 
-      <div class="botoes-excluir">
-        <a class="btn-confirm btn-nao" href="{{ url_for('adminaulaslistas') }}" >Não</a>
-        <a class="btn-confirm btn-sim" href="{{ url_for('adminaulaslistas') }}" >Sim</a>
-      </div>
-    </div>
+  <input type="text" maxlength="50" name="titulo" placeholder="Digite o Título" required>
+  <input type="text" maxlength="254" name="descricao" placeholder="Digite a Descrição" required>
+
+  <a href="{{ url_for('adminaulaslista') }}">Voltar</a>
+  <button type="submit" class="btn adicionar">Adicionar</button>
+</form>
+
   </main>
 
   <footer class="alinhaitem">

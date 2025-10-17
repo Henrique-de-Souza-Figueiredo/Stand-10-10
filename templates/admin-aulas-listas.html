@@ -97,15 +97,23 @@
                     <p class="id">{{ aula[0] }}</p>
                     <p class="item-name">{{ aula[1] }}</p>
                     <p class="item-descricao">{{ aula[2] }}</p>
-                    <p class="item-data">Data: {{ aula[3] }}</p>
-                    <p class="item-horario">Horário: {{ aula[4] }}</p>
-                    <p class="item-capacidade">Vagas: {{ aula[5] }}</p>
-                    <p class="item-professor">Professor: {{ aula[6] }}</p>
-                    <p class="item-modalidade">Modalidade: {{ aula[7] }}</p>
                 </div>
+                 <div class="item-texto">
+                    <p class="item-data">Data: {{ aula[3] }}</p>
+                    <p class="item-horario">Horário Inicio: {{ aula[4] }}</p>
+                    <p class="item-horario">Horário Final: {{ aula[5] }}</p>
+                     </div>
+                <div class="item-texto">
+                    <p class="item-professor">Professor: {{ aula[7] }}</p>
+                    <p class="item-modalidade">Modalidade: {{ aula[8] }}</p>
+                </div>
+                <div class="item-texto">
+                <p class="item-capacidade">Vagas: {{ aula[6] }} / {{ aula[9] }}</p>
+                 </div>
+                <div class="item-texto">
                 <div class="item-actions">
-                    <a href="" class="btn btn-ver">Alunos</a>
-                    <a href="{{ url_for('adminexcluiraula') }}" class="btn btn-deletar">Excluir Aula</a>
+                    <a href="{{ url_for('adminalunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                    <a href="{{ url_for('adminexcluiraula', aula_id=aula[0]) }}" class="btn btn-deletar">Cancelar Aula</a>
                     <a href="{{ url_for('admineditaraula', id=aula[0]) }}" class="btn btn-editar">Editar Aula</a>
                 </div>
             </li>
