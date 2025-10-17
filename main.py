@@ -35,9 +35,53 @@ def alunodashbord():
         return redirect(url_for('login'))
 
     if session.get('tipo') != 1:
-        flash('Acesso negado. Somente alunos nessa pagina.', 'erro')
+        flash('Acesso negado. Somente alunos nessa página.', 'erro')
         return redirect(url_for('login'))
-    return render_template('aluno-dashbord.html', titulo='Dashboard aluno')
+
+    id_aluno = session['id_usuario']
+    hoje = date.today()
+    inicio_semana = hoje - timedelta(days=hoje.weekday())
+    fim_semana = inicio_semana + timedelta(days=6)
+
+    cursor = con.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM (
+            SELECT A.ID_AULA
+            FROM AULA A
+            LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+            WHERE A.DATA_AULA = ?
+            GROUP BY A.ID_AULA, A.CAPACIDADE
+            HAVING COUNT(AA.ID_ALUNO) < A.CAPACIDADE
+        ) AS sub
+    """, (hoje,))
+    aulas_disponiveis_hoje = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM (SELECT A.ID_AULA
+            FROM AULA A
+            LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+            WHERE A.DATA_AULA BETWEEN ? AND ?
+            GROUP BY A.ID_AULA, A.CAPACIDADE
+            HAVING COUNT(AA.ID_ALUNO) < A.CAPACIDADE
+        ) AS sub
+    """, (inicio_semana, fim_semana))
+    aulas_disponiveis_semana = cursor.fetchone()[0]
+
+    # 🔹 Suas aulas inscritas hoje
+    cursor.execute("SELECT COUNT(*) FROM AULA_ALUNO AA JOIN AULA A ON AA.ID_AULA = A.ID_AULA WHERE AA.ID_ALUNO = ? AND A.DATA_AULA = ?",
+                   (id_aluno, hoje))
+    aulas_inscritas_hoje = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM AULA_ALUNO AA JOIN AULA A ON AA.ID_AULA = A.ID_AULA WHERE AA.ID_ALUNO = ? AND A.DATA_AULA BETWEEN ? AND ?",
+                   (id_aluno, inicio_semana, fim_semana))
+    aulas_inscritas_semana = cursor.fetchone()[0]
+
+    cursor.close()
+
+    return render_template('aluno-dashbord.html',titulo='Dashboard Aluno',aulas_disponiveis_hoje=aulas_disponiveis_hoje,aulas_disponiveis_semana=aulas_disponiveis_semana,aulas_inscritas_hoje=aulas_inscritas_hoje,aulas_inscritas_semana=aulas_inscritas_semana)
 
 @app.route('/alunoprofessoreslista')
 def alunoprofessoreslista():
