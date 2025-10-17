@@ -19,13 +19,13 @@ con = fdb.connect(host=host, database=database, user=user, password=password)
 def index():
     if 'id_usuario' in session:
         flash('Você precisa deslogar primeiro.', 'erro')
-        if session.get('alunodashbord') == 1:
-            return redirect('')
+        if session.get('tipo') == 1:
+            return redirect('alunodashbord')
         elif session.get('tipo') == 2:
             return redirect('professordashbord')
         else:
             return redirect('dashbordadmin')
-        
+
     return render_template('index.html', titulo='Pagina inicial')
 
 @app.route('/logout')
@@ -88,7 +88,6 @@ def alunodashbord():
     """, (inicio_semana, fim_semana))
     aulas_disponiveis_semana = cursor.fetchone()[0]
 
-    # 🔹 Suas aulas inscritas hoje
     cursor.execute("SELECT COUNT(*) FROM AULA_ALUNO AA JOIN AULA A ON AA.ID_AULA = A.ID_AULA WHERE AA.ID_ALUNO = ? AND A.DATA_AULA = ?",
                    (id_aluno, hoje))
     aulas_inscritas_hoje = cursor.fetchone()[0]
