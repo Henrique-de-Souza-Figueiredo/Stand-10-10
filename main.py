@@ -17,6 +17,15 @@ con = fdb.connect(host=host, database=database, user=user, password=password)
 
 @app.route('/')
 def index():
+    if 'id_usuario' in session:
+        flash('Você precisa deslogar primeiro.', 'erro')
+        if session.get('alunodashbord') == 1:
+            return redirect('')
+        elif session.get('tipo') == 2:
+            return redirect('professordashbord')
+        else:
+            return redirect('dashbordadmin')
+        
     return render_template('index.html', titulo='Pagina inicial')
 
 @app.route('/logout')
@@ -26,6 +35,15 @@ def logout():
 
 @app.route('/cadastro')
 def cadastro():
+    if 'id_usuario' in session:
+        flash('Você precisa deslogar primeiro.', 'erro')
+        if session.get('alunodashbord') == 1:
+            return redirect('')
+        elif session.get('tipo') == 2:
+            return redirect('professordashbord')
+        else:
+            return redirect('dashbordadmin')
+
     return render_template('cadastro.html', titulo='Novo usuario')
 
 @app.route('/alunodashbord')
@@ -1340,7 +1358,6 @@ def cadastrar():
 
     try:
         cursor = con.cursor()
-        #Seleciona o primeiro valor igual a email encontrado na tabela
         cursor.execute('SELECT 1 FROM usuario WHERE usuario.email= ?', (email,))
         if cursor.fetchone():
             flash("Esse email já está cadastrado", 'error')
@@ -1356,6 +1373,16 @@ def cadastrar():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if 'id_usuario' in session:
+        flash('Você precisa deslogar primeiro.', 'erro')
+        if session.get('alunodashbord') == 1:
+            return redirect('')
+        elif session.get('tipo') == 2:
+            return redirect('professordashbord')
+        else:
+            return redirect('dashbordadmin')
+
+
     if request.method == 'POST':
         email = request.form['email']
         senha = request.form['senha']
