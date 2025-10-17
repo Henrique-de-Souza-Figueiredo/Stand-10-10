@@ -780,6 +780,7 @@ h5 {
     margin-bottom: var(--esp-xs);
 }
 
+
 .item-name {
     margin: 0;
     font-size: 1.2em;
@@ -1120,6 +1121,7 @@ h5 {
 .lista-item p {
     margin: 0 10px 0 0;
 }
+
 
 .item-actions {
     display: flex;
