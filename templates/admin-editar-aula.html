@@ -26,17 +26,35 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+      <form class="formulario" method="POST" action="{{ url_for('admineditaraula', id=aula[0]) }}">
+  <h1>Editar Aula</h1>
 
-    <form class="formulario">
-      <h1>Adicionar aula</h1>
-      <select placeholder="Professor">
-      <input type="date" placeholder="Data">
-      <input type="datetime" placeholder="Horário">
-      <input type="text" placeholder="Modalidade">
-      <input type="number" placeholder="Vagas">
-      <a href="{{ url_for('adminaulaslista') }}">Cancelar</a>
-      <button class="cadastrar"><a href="{{ url_for('adminaulaslista') }}">Adicionar</a></button>
-        </form>
+  <select id="professor_id" name="professor_id" required>
+    <option value="">Selecionar professor</option>
+    {% for professor in professores %}
+      <option value="{{ professor[0] }}" data-especialidade="{{ professor[2] }}"
+        {% if professor[0] == aula[6] %}selected{% endif %}>
+        {{ professor[1] }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <input type="text" name="nome" placeholder="Nome da Aula" value="{{ aula[1] }}" required>
+
+  <input type="text" maxlength="254" name="descricao" placeholder="Digite a Descrição" value="{{ aula[2] }}" required>
+
+  <input type="date" name="data_aula" value="{{ aula[3] }}" required>
+
+  <input type="time" name="horario" value="{{ aula[4] }}" required>
+
+  <input type="number" min="10" max="20" name="capacidade" value="{{ aula[5] }}" required>
+
+  <input type="text" id="modalidade" name="modalidade" value="{{ aula[7] }}" readonly required>
+
+  <button type="submit" class="cadastrar">Salvar Alterações</button>
+  <a href="{{ url_for('adminaulaslista') }}">Cancelar</a>
+</form>
+
   </main>
 
   <footer class="alinhaitem">
@@ -56,6 +74,7 @@
 
     <div class="linha"></div>
   </footer>
+<script src="../static/js/adicionaraula.js"></script>
 </body>
 
 </html>

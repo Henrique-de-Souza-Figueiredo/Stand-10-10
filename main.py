@@ -755,16 +755,54 @@ def adminexcluiralunoaula():
     return render_template('admin-excluir-aluno-aula.html', titulo='Dashboard admin excluir aluno aula')
 
 
-@app.route('/admineditaraula')
-def admineditaraula():
+@app.route('/admineditaraula/<int:id>', methods=['GET', 'POST'])
+def admineditaraula(id):
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
         return redirect(url_for('login'))
 
     if session.get('tipo') != 3:
-        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
+        flash('Acesso negado. Somente administradores nessa página.', 'erro')
         return redirect(url_for('login'))
-    return render_template('admin-editar-aula.html', titulo='Dashboard admin editar aula')
+
+    cursor = con.cursor()
+
+    # Buscar lista de professores
+    cursor.execute("SELECT ID_USUARIO, NOME, ESPECIALIDADE FROM USUARIO WHERE TIPO = 2")
+    professores = cursor.fetchall()
+
+    # Buscar dados da aula
+    cursor.execute("SELECT ID_AULA, NOME, DESCRICAO, DATA_AULA, HORARIO, CAPACIDADE, PROFESSOR_ID, MODALIDADE FROM AULA WHERE ID_AULA = ?",
+                   (id,))
+    aula = cursor.fetchone()
+
+    if not aula:
+        flash('Aula não encontrada.', 'erro')
+        cursor.close()
+        return redirect(url_for('adminaulaslista'))
+
+    # Atualizar aula
+    if request.method == 'POST':
+        nome = request.form['nome']
+        descricao = request.form['descricao']
+        data_aula = request.form['data_aula']
+        horario = request.form['horario']
+        capacidade = request.form['capacidade']
+        professor_id = request.form['professor_id']
+        modalidade = request.form['modalidade']
+
+        cursor.execute("UPDATE AULA SET NOME = ?, DESCRICAO = ?, DATA_AULA = ?, HORARIO = ?, CAPACIDADE = ?, PROFESSOR_ID = ?, MODALIDADE = ? WHERE ID_AULA = ?",
+                       (nome, descricao, data_aula, horario, capacidade, professor_id, modalidade, id))
+
+        con.commit()
+        cursor.close()
+
+        flash('Aula atualizada com sucesso!', 'success')
+        return redirect(url_for('adminaulaslista'))
+
+    cursor.close()
+    return render_template('admin-editar-aula.html', aula=aula, professores=professores, titulo='Editar Aula')
+
 
 
 @app.route('/adminexcluiraula')
