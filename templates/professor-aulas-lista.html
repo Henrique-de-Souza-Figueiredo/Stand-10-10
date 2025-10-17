@@ -73,23 +73,39 @@
         {% endif %}
         {% endwith %}
             <div class="lista-header">
-                <h1>Lista de aulas</h1>
+                <h1>Aulas</h1>
             </div>
 
-            <ul>
-
-                <li class="lista-item">
-                    <p class="item-name">Zumba das 8:00 as 9:00</p>
-                    <p class="item-name">02/10/2025</p>
-                    <div class="item-actions">
-                        <p class="vagas-info">(0/20)</p>
-                        <a href="{{ url_for('professoralunosmatriculados') }}" class="btn btn-ver">Alunos</a>
-                    </div>
-                </li>
-
-            </ul>
+    <div class="lista-scroll">
+        {% for aula in aulas %}
+        <ul>
+            <li class="lista-item">
+                <div class="item-texto">
+                    <p class="id">{{ aula[0] }}</p>
+                    <p class="item-name">{{ aula[1] }}</p>
+                    <p class="item-descricao">{{ aula[2] }}</p>
+                </div>
+                 <div class="item-texto">
+                    <p class="item-data">Data: {{ aula[3] }}</p>
+                    <p class="item-horario">Horário Inicio: {{ aula[4] }}</p>
+                    <p class="item-horario">Horário Final: {{ aula[5] }}</p>
+                     </div>
+                <div class="item-texto">
+                    <p class="item-professor">Professor: {{ aula[7] }}</p>
+                    <p class="item-modalidade">Modalidade: {{ aula[8] }}</p>
+                </div>
+                <div class="item-texto">
+                <p class="item-capacidade">Vagas: {{ aula[6] }} / {{ aula[9] }}</p>
+                 </div>
+                <div class="item-texto">
+                <div class="item-actions">
+                    <a href="{{ url_for('professoralunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                </div>
+            </li>
+        </ul>
+        {% endfor %}
         </div>
-
+        </div>
     </main>
 
 

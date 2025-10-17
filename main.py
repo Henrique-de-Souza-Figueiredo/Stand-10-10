@@ -1,5 +1,6 @@
 from flask import Flask, render_template, flash, request, url_for, redirect, session
 from flask_bcrypt import generate_password_hash, check_password_hash
+from datetime import date, datetime, timedelta
 import fdb
 
 app = Flask(__name__)
@@ -176,9 +177,12 @@ def dashbordadmin():
     cursor.execute("SELECT COUNT(*) FROM usuario WHERE tipo = 3")
     total_admins = cursor.fetchone()[0]
 
+    cursor.execute("SELECT COUNT(*) FROM AULA")
+    total_aula = cursor.fetchone()[0]
+
     cursor.close()
 
-    return render_template('dashbord-admin.html', titulo='Dashboard Admin', total_alunos=total_alunos, total_professores=total_professores,total_admins=total_admins)
+    return render_template('dashbord-admin.html', titulo='Dashboard Admin', total_alunos=total_alunos, total_professores=total_professores,total_admins=total_admins, total_aula=total_aula)
 
 
 @app.route('/adminalunoslista')
@@ -661,8 +665,7 @@ def adminaulaslista():
 
     cursor = con.cursor()
     # Seleciona todas as aulas com informações do professor
-    cursor.execute("""
-           SELECT 
+    cursor.execute("""SELECT 
                A.ID_AULA, 
                A.NOME, 
                A.DESCRICAO, 
@@ -783,10 +786,12 @@ def admineditaraula(id):
 
     cursor = con.cursor()
 
+    # Buscar professores
     cursor.execute("SELECT ID_USUARIO, NOME, ESPECIALIDADE FROM USUARIO WHERE TIPO = 2")
     professores = cursor.fetchall()
 
-    cursor.execute("SELECT ID_AULA, NOME, DESCRICAO, DATA_AULA, HORARIO, CAPACIDADE, PROFESSOR_ID, MODALIDADE FROM AULA WHERE ID_AULA = ?",
+    # Buscar dados da aula
+    cursor.execute("SELECT ID_AULA, NOME, DESCRICAO, DATA_AULA, HORARIO, HORARIO_FINAL FROM AULA WHERE ID_AULA = ?",
                    (id,))
     aula = cursor.fetchone()
 
@@ -795,17 +800,16 @@ def admineditaraula(id):
         cursor.close()
         return redirect(url_for('adminaulaslista'))
 
+    # Atualizar aula
     if request.method == 'POST':
         nome = request.form['nome']
         descricao = request.form['descricao']
         data_aula = request.form['data_aula']
         horario = request.form['horario']
-        capacidade = request.form['capacidade']
-        professor_id = request.form['professor_id']
-        modalidade = request.form['modalidade']
+        horario_final = request.form['horario_final']
 
-        cursor.execute("UPDATE AULA SET NOME = ?, DESCRICAO = ?, DATA_AULA = ?, HORARIO = ?, CAPACIDADE = ?, PROFESSOR_ID = ?, MODALIDADE = ? WHERE ID_AULA = ?",
-                       (nome, descricao, data_aula, horario, capacidade, professor_id, modalidade, id))
+        cursor.execute("UPDATE AULA SET NOME = ?, DESCRICAO = ?, DATA_AULA = ?, HORARIO = ?, HORARIO_FINAL = ? WHERE ID_AULA = ?",
+                       (nome, descricao, data_aula, horario, horario_final, id))
 
         con.commit()
         cursor.close()
@@ -815,7 +819,6 @@ def admineditaraula(id):
 
     cursor.close()
     return render_template('admin-editar-aula.html', aula=aula, professores=professores, titulo='Editar Aula')
-
 
 
 @app.route('/adminexcluiraula/<int:aula_id>', methods=['GET', 'POST'])
@@ -1042,7 +1045,31 @@ def professordashbord():
     if session.get('tipo') != 2:
         flash('Acesso negado. Apenas professores nessa pagina.', 'erro')
         return redirect(url_for('login'))
-    return render_template('professor-dashbord.html', titulo='Dashboard professor')
+
+    id_professor = session['id_usuario']
+    hoje = date.today()
+    inicio_semana = hoje - timedelta(days=hoje.weekday())  # Segunda
+    fim_semana = inicio_semana + timedelta(days=6)  # Domingo
+
+    cursor = con.cursor()
+
+    # 🔹 Conta quantas aulas o professor tem hoje
+    cursor.execute("""
+            SELECT COUNT(*) FROM AULA
+            WHERE PROFESSOR_ID = ? AND DATA_AULA = ?
+        """, (id_professor, hoje))
+    total_hoje = cursor.fetchone()[0]
+
+    # 🔹 Conta quantas aulas o professor tem na semana
+    cursor.execute("""
+            SELECT COUNT(*) FROM AULA
+            WHERE PROFESSOR_ID = ? AND DATA_AULA BETWEEN ? AND ?
+        """, (id_professor, inicio_semana, fim_semana))
+    total_semana = cursor.fetchone()[0]
+
+    cursor.close()
+
+    return render_template('professor-dashbord.html',titulo='Dashboard Professor',total_hoje=total_hoje,total_semana=total_semana)
 
 @app.route('/professoreditarconta', methods=['GET', 'POST'])
 def professoreditarconta():
@@ -1124,8 +1151,37 @@ def professoraulaslista():
     if session.get('tipo') != 2:
         flash('Acesso negado. Apenas professores nessa pagina.', 'erro')
         return redirect(url_for('login'))
-    return render_template('professor-aulas-lista.html', titulo='Dashboard professor aulas lista')
 
+    id_professor = session['id_usuario']  # Pega o ID do professor logado
+
+    cursor = con.cursor()
+    # Seleciona apenas as aulas do professor logado
+    cursor.execute("""
+            SELECT 
+                A.ID_AULA, 
+                A.NOME, 
+                A.DESCRICAO, 
+                A.DATA_AULA, 
+                A.HORARIO, 
+                A.HORARIO_FINAL, 
+                A.CAPACIDADE, 
+                U.NOME AS PROFESSOR, 
+                A.MODALIDADE,
+                COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS
+            FROM AULA A
+            JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
+            LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+            WHERE A.PROFESSOR_ID = ?
+            GROUP BY 
+                A.ID_AULA, A.NOME, A.DESCRICAO, A.DATA_AULA, 
+                A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME, A.MODALIDADE
+            ORDER BY A.DATA_AULA, A.HORARIO
+        """, (id_professor,))
+
+    aulas = cursor.fetchall()
+    cursor.close()
+
+    return render_template('professor-aulas-lista.html', aulas=aulas, titulo='Dashboard professor aulas lista')
 @app.route('/professoravisos')
 def professoravisos():
     if 'id_usuario' not in session:
@@ -1143,8 +1199,8 @@ def professoravisos():
 
     return render_template('professor-avisos.html', avisoli=avisoli, titulo='Dashboard professor lista aviso')
 
-@app.route('/professoralunosmatriculados')
-def professoralunosmatriculados():
+@app.route('/professoralunosmatriculados/<int:aula_id>')
+def professoralunosmatriculados(aula_id):
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
         return redirect(url_for('login'))
@@ -1152,7 +1208,21 @@ def professoralunosmatriculados():
     if session.get('tipo') != 2:
         flash('Acesso negado. Apenas professores nessa pagina', 'erro')
         return redirect(url_for('login'))
-    return render_template('professor-alunos-matriculados.html', titulo='Dashboard professor alunos matriculados')
+
+    cursor = con.cursor()
+
+    # Pega dados da aula
+    cursor.execute("SELECT NOME FROM AULA WHERE ID_AULA = ?", (aula_id,))
+    aula = cursor.fetchone()
+
+    # Pega alunos matriculados na aula
+    cursor.execute("SELECT U.ID_USUARIO, U.NOME, U.EMAIL FROM AULA_ALUNO AA JOIN USUARIO U ON AA.ID_ALUNO = U.ID_USUARIO WHERE AA.ID_AULA = ?",
+                   (aula_id,))
+    alunosmatriculado = cursor.fetchall()
+
+    cursor.close()
+
+    return render_template('professor-alunos-matriculados.html', aula=aula, alunosmatriculado=alunosmatriculado, titulo='Dashboard professor alunos matriculados')
 
 @app.route('/cadastrar', methods=['POST'])
 def cadastrar():
