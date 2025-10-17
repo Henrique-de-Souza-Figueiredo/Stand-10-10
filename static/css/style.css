@@ -50,6 +50,7 @@
     /* vermelho forte */
     --cor-flash-maligno-texto: #721c24;
     /* vermelho escuro */
+    --cor-desinscrever: #039603;
 
     --espacamento-padding-cabeçalho: 15px 40px;
     --espacamento-nav-sem-login: 8px 20px;
@@ -843,7 +844,14 @@ h5 {
 
 .btn-deletar {
     background-color: var(--cor-vermelho);
+}
 
+.btn-inscrever{
+    background-color: var(--cor-verde-neon);
+}
+
+.btn-desinscrever{
+    background-color: var(--cor-desinscrever);
 }
 
 .diasemana {

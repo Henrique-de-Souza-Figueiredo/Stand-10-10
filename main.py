@@ -73,16 +73,63 @@ def alunoavisos():
     return render_template('aluno-avisos.html', avisoli=avisoli, titulo='Dashboard aluno lista aviso')
 
 
-@app.route('/alunoaulaslista')
+@app.route('/alunoaulaslista', methods=['GET', 'POST'])
 def alunoaulaslista():
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
         return redirect(url_for('login'))
 
     if session.get('tipo') != 1:
-        flash('Acesso negado. Somente alunos nessa pagina.', 'erro')
+        flash('Acesso negado. Somente alunos nessa página.', 'erro')
         return redirect(url_for('login'))
-    return render_template('aluno-aulas-lista.html', titulo='Dashboard aluno')
+
+    id_aluno = session['id_usuario']
+    cursor = con.cursor()
+
+    if request.method == 'POST':
+        id_aula = request.form['id_aula']
+        acao = request.form['acao']
+
+        if acao == 'inscrever':
+            cursor.execute("SELECT COUNT(*) FROM AULA_ALUNO WHERE ID_ALUNO = ? AND ID_AULA = ?", (id_aluno, id_aula))
+            ja_inscrito = cursor.fetchone()[0]
+
+            if ja_inscrito:
+                flash('Você já está inscrito nesta aula.', 'erro')
+            else:
+                cursor.execute("INSERT INTO AULA_ALUNO (ID_ALUNO, ID_AULA) VALUES (?, ?)", (id_aluno, id_aula))
+                con.commit()
+
+        elif acao == 'desinscrever':
+            cursor.execute("DELETE FROM AULA_ALUNO WHERE ID_ALUNO = ? AND ID_AULA = ?", (id_aluno, id_aula))
+            con.commit()
+
+    cursor.execute("""
+        SELECT 
+            A.ID_AULA,
+            A.NOME,
+            A.DESCRICAO,
+            A.DATA_AULA,
+            A.HORARIO,
+            A.HORARIO_FINAL,
+            A.CAPACIDADE,
+            U.NOME AS PROFESSOR,
+            A.MODALIDADE,
+            COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS
+        FROM AULA A
+        JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
+        LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+        GROUP BY A.ID_AULA, A.NOME, A.DESCRICAO, A.DATA_AULA, 
+                 A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME, A.MODALIDADE
+        ORDER BY A.DATA_AULA, A.HORARIO
+    """)
+    aulas = cursor.fetchall()
+
+    cursor.execute("SELECT ID_AULA FROM AULA_ALUNO WHERE ID_ALUNO = ?", (id_aluno,))
+    inscricoes = {row[0] for row in cursor.fetchall()}
+
+    cursor.close()
+    return render_template('aluno-aulas-lista.html', aulas=aulas, inscricoes=inscricoes, titulo='Dashboard aluno')
 
 @app.route('/alunoeditarconta', methods=['GET', 'POST'])
 def alunoeditarconta():
@@ -833,14 +880,11 @@ def adminexcluiraula(aula_id):
         titulo = request.form['titulo']
         descricao = request.form['descricao']
 
-        # 1️⃣ Inserir aviso na tabela AVISOS
         cursor.execute("INSERT INTO AVISO (TITULO, DESCRICAO) VALUES (?, ?)",
                        (titulo, descricao))
 
-        # 2️⃣ Deletar todas as inscrições da aula
         cursor.execute("DELETE FROM AULA_ALUNO WHERE ID_AULA = ?", (aula_id,))
 
-        # 3️⃣ Deletar a própria aula
         cursor.execute("DELETE FROM AULA WHERE ID_AULA = ?", (aula_id,))
 
         con.commit()
@@ -1052,15 +1096,12 @@ def professordashbord():
     fim_semana = inicio_semana + timedelta(days=6)  # Domingo
 
     cursor = con.cursor()
-
-    # 🔹 Conta quantas aulas o professor tem hoje
     cursor.execute("""
             SELECT COUNT(*) FROM AULA
             WHERE PROFESSOR_ID = ? AND DATA_AULA = ?
         """, (id_professor, hoje))
     total_hoje = cursor.fetchone()[0]
 
-    # 🔹 Conta quantas aulas o professor tem na semana
     cursor.execute("""
             SELECT COUNT(*) FROM AULA
             WHERE PROFESSOR_ID = ? AND DATA_AULA BETWEEN ? AND ?
