@@ -832,6 +832,14 @@ def adminadicionaraula():
                 """, (professor_id, data_aula, horario, horario_final, horario, horario_final, horario, horario_final))
         conflito = cursor.fetchone()
 
+        cursor.execute("SELECT 1 FROM AULA WHERE NOME = ?", (nome,))
+        conflito_nome = cursor.fetchone()
+
+        if conflito_nome:
+            flash('Ja existe uma aula com esse nome', 'erro')
+            cursor.close()
+            return redirect(url_for('adminadicionaraula'))
+
         if conflito:
             flash('O professor já possui uma aula nesse horário!', 'erro')
             cursor.close()
@@ -915,6 +923,14 @@ def admineditaraula(id):
         data_aula = request.form['data_aula']
         horario = request.form['horario']
         horario_final = request.form['horario_final']
+
+        cursor.execute("SELECT 1 FROM AULA WHERE NOME = ? AND ID_AULA != ?", (nome,id))
+        conflito_nome = cursor.fetchone()
+
+        if conflito_nome:
+            flash('Ja existe uma aula com esse nome', 'erro')
+            cursor.close()
+            return redirect(url_for('admineditaraula', id=id))
 
         cursor.execute("UPDATE AULA SET NOME = ?, DESCRICAO = ?, DATA_AULA = ?, HORARIO = ?, HORARIO_FINAL = ? WHERE ID_AULA = ?",
                        (nome, descricao, data_aula, horario, horario_final, id))
