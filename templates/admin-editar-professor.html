@@ -26,17 +26,32 @@
         {% endwith %}
 
 <form action="{{ url_for('admineditarprofessor', id=id) }}" method="post" class="formulario">
-    <h1>O que deseja mudar?</h1>
-    <input type="text" id="nome" name="nome" placeholder="Digite seu Nome" value="{{ nome }}" required>
-    <input type="email" id="email" name="email" placeholder="Digite seu Email" value="{{ email }}" required>
-    <input type="tel" minlength="10" maxlength="11" pattern="[0-9]{10,11}" inputmode="numeric" oninput="this.value = this.value.replace(/\D/g, '').slice(0,11);"
-           title="Digite apenas números, 10 a 11 dígitos" id="telefone" name="telefone" placeholder="Digite seu Telefone" value="{{ telefone }}" required>
-    <input type="text" id="especialidade" name="especialidade" placeholder="Especialidade" value="{{ especialidade }}" required>
-    <input type="password" minlength="8" maxlength="16" id="senha" name="senha" placeholder="Digite sua nova senha">
-    <input type="password" minlength="8" maxlength="16" id="confsenha" name="confsenha" placeholder="Confirme sua nova senha">
-    <a href="{{ url_for('adminprofessoreslista') }}">Cancelar</a>
-    <button type="submit" class="salvar">Salvar</button>
+  <h1>Editar Professor</h1>
+
+  <select name="especialidade" id="campo-especialidade" required>
+      <option value="">Selecione uma modalidade</option>
+      {% for modalidade in modalidades %}
+        <option value="{{ modalidade[1] }}" {% if modalidade[1] == especialidade %}selected{% endif %}>
+            {{ modalidade[1] }}
+        </option>
+      {% endfor %}
+  </select>
+
+  <input type="text" name="nome" placeholder="Digite o Nome" value="{{ nome }}" required>
+  <input type="email" name="email" placeholder="Digite o Email" value="{{ email }}" required>
+  <input type="tel" minlength="10" maxlength="11" pattern="[0-9]{10,11}" inputmode="numeric"
+     oninput="this.value = this.value.replace(/\D/g, '').slice(0,11);"
+     title="Digite apenas números, 10 a 11 dígitos"
+     name="telefone" placeholder="Digite o Telefone" value="{{ telefone }}" required>
+
+  <input type="password" minlength="8" maxlength="16" name="senha" placeholder="Digite a Nova Senha" required>
+  <input type="password" minlength="8" maxlength="16" name="confsenha" placeholder="Confirme a Nova Senha" required>
+
+  <a href="{{ url_for('adminprofessoreslista') }}">Cancelar</a>
+
+  <button type="submit">Salvar Alterações</button>
 </form>
+
 </main> 
 
 <footer class="alinhaitem">

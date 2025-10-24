@@ -465,17 +465,24 @@ def admineditarprofessor(id):
         return redirect(url_for('login'))
 
     cursor = con.cursor()
-    cursor.execute("SELECT nome, email, telefone, especialidade, senha FROM usuario WHERE id_usuario = ?", (id,))
-    usuario = cursor.fetchone()
 
-    if not usuario:
+    # --- INÍCIO DA MODIFICAÇÃO ---
+    # 1. Verificar se o professor tem aulas cadastradas ANTES de fazer qualquer coisa
+    #    (Assumindo que a FK na tabela AULA é 'PROFESSOR_ID')
+    cursor.execute("SELECT 1 FROM AULA WHERE PROFESSOR_ID = ?", (id,))
+    aula_existente = cursor.fetchone()
+
+    if aula_existente:
         cursor.close()
-        flash("Usuário não foi encontrado.", 'erro')
+        flash(f"Não é possível editar este professor, pois ele(a) já possui aulas cadastradas. ",'erro')
+
         return redirect(url_for('adminprofessoreslista'))
 
-    nome, email, telefone, especialidade, senha_atual = usuario
+    cursor.execute("SELECT id_modalidade, moda FROM modalidades ORDER BY moda")
+    modalidades_lista = cursor.fetchall()
 
     if request.method == 'POST':
+
         nome = request.form['nome']
         email = request.form['email']
         telefone = request.form['telefone']
@@ -485,12 +492,18 @@ def admineditarprofessor(id):
 
         if senha and senha != confsenha:
             flash('As senhas não conferem!', 'erro')
-            return render_template("admin-editar-professor.html", id=id, nome=nome, email=email, telefone=telefone, especialidade=especialidade)
+            return render_template("admin-editar-professor.html",
+                                   id=id, modalidades=modalidades_lista,
+                                   nome=nome, email=email, telefone=telefone,
+                                   especialidade=especialidade)
 
         cursor.execute('SELECT 1 FROM usuario WHERE email = ? AND id_usuario != ?', (email, id))
         if cursor.fetchone():
             flash("Esse email já está cadastrado por outro usuário.", 'erro')
-            return render_template("admin-editar-aluno.html", id=id, nome=nome, email=email, telefone=telefone)
+            return render_template("admin-editar-professor.html",
+                                   id=id, modalidades=modalidades_lista,
+                                   nome=nome, email=email, telefone=telefone,
+                                   especialidade=especialidade)
 
         if senha:
             maiusculo = minuscula = numero = caracterEspecial = False
@@ -506,24 +519,44 @@ def admineditarprofessor(id):
 
             if not (maiusculo and minuscula and numero and caracterEspecial):
                 flash("A senha deve conter letra maiúscula, minúscula, número e caractere especial.", 'erro')
-                return render_template("admin-editar-professor.html",id=id, nome=nome, email=email, telefone=telefone, especialidade=especialidade)
+                return render_template("admin-editar-professor.html",
+                                       id=id, modalidades=modalidades_lista,
+                                       nome=nome, email=email, telefone=telefone,
+                                       especialidade=especialidade)
 
             senha_hash = generate_password_hash(senha)
-            cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ?, especialidade = ?, senha = ? WHERE id_usuario = ?',
-                           (nome, email, telefone, especialidade, senha_hash, id))
+            cursor.execute("""
+                UPDATE usuario 
+                SET nome = ?, email = ?, telefone = ?, especialidade = ?, senha = ? 
+                WHERE id_usuario = ?
+            """, (nome, email, telefone, especialidade, senha_hash, id))
+
         else:
-            cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ?, especialidade = ? WHERE id_usuario = ?',
-                           (nome, email, telefone, especialidade, id))
+            cursor.execute("""
+                UPDATE usuario 
+                SET nome = ?, email = ?, telefone = ?, especialidade = ? 
+                WHERE id_usuario = ?
+            """, (nome, email, telefone, especialidade, id))
 
         con.commit()
         cursor.close()
-        flash('Usuário atualizado com sucesso!', 'success')
+        flash('Professor atualizado com sucesso!', 'success')
         return redirect(url_for('adminprofessoreslista'))
 
-    cursor.close()
-    return render_template(
-        'admin-editar-professor.html',id=id, nome=nome, email=email, telefone=telefone, especialidade=especialidade)
+    else:
+        cursor.execute("SELECT nome, email, telefone, especialidade FROM usuario WHERE id_usuario = ?", (id,))
+        professor = cursor.fetchone()
 
+        if not professor:
+            cursor.close()
+            flash("Professor não foi encontrado.", 'erro')
+            return redirect(url_for('adminprofessoreslista'))
+
+        nome_atual, email_atual, telefone_atual, especialidade_atual = professor
+        cursor.close()
+
+        return render_template(
+            'admin-editar-professor.html',id=id,modalidades=modalidades_lista,nome=nome_atual,email=email_atual,telefone=telefone_atual,especialidade=especialidade_atual)
 
 @app.route('/adminexcluirprofessor/<int:id>', methods=['GET', 'POST'])
 def adminexcluirprofessor(id):
@@ -549,19 +582,30 @@ def adminexcluirprofessor(id):
     if request.method == 'POST':
         confirmar = request.form.get('confirmar')
         if confirmar == 'sim':
+
+            cursor.execute("SELECT 1 FROM AULA WHERE PROFESSOR_ID = ?", (id,))
+            aula_existente = cursor.fetchone()
+
+            if aula_existente:
+                cursor.close()
+                flash(
+                    f"Não é possível excluir o professor '{nome}', pois ele(a) já possui aulas cadastradas no sistema.",
+                    'erro')
+                return redirect(url_for('adminprofessoreslista'))
+
             cursor.execute("DELETE FROM usuario WHERE id_usuario = ?", (id,))
             con.commit()
             cursor.close()
             flash(f"O professor '{nome}' foi excluído com sucesso.", 'success')
             return redirect(url_for('adminprofessoreslista'))
+
         else:
             cursor.close()
-            flash("Exclusão cancelada.", 'erro')
+            flash("Exclusão cancelada.", 'info')
             return redirect(url_for('adminprofessoreslista'))
 
     cursor.close()
     return render_template('admin-excluir-professor.html', id=id, nome=nome, email=email)
-
 
 @app.route('/adminadmlista')
 def adminadmlista():
@@ -792,6 +836,16 @@ def adminadicionarmodalidades():
         vagas = request.form['vagas']
 
         cursor = con.cursor()
+
+        cursor.execute("SELECT 1 FROM MODALIDADES WHERE MODA = ?", (moda,))
+        conflito_moda = cursor.fetchone()
+
+        if conflito_moda:
+            flash('Ja existe essa modalidade', 'erro')
+            cursor.close()
+            return redirect(url_for('adminadicionarmodalidades'))
+
+        cursor = con.cursor()
         cursor.execute("INSERT INTO modalidades (moda, vagas) VALUES (?, ?)", (moda, vagas))
         con.commit()
         cursor.close()
@@ -814,18 +868,45 @@ def adminexcluirmodalidades(id):
     cursor = con.cursor()
 
     if request.method == 'GET':
-        # Busca o aviso pelo ID e mostra a tela de confirmação
         cursor.execute("SELECT id_modalidade, moda, vagas FROM modalidades WHERE id_modalidade = ?", (id,))
         modalidade = cursor.fetchone()
         cursor.close()
 
         if not modalidade:
-            flash("Aviso não encontrado.", "erro")
+            flash("Modalidade não encontrada.", "erro")
             return redirect(url_for('adminmodalidadeslista'))
 
         return render_template('admin-excluir-modalidades.html', modalidade=modalidade)
 
-    # Se for POST, realmente exclui
+    cursor.execute("SELECT moda FROM modalidades WHERE id_modalidade = ?", (id,))
+    modalidade_record = cursor.fetchone()
+
+    if not modalidade_record:
+        flash("Modalidade não encontrada.", "erro")
+        cursor.close()
+        return redirect(url_for('adminmodalidadeslista'))
+
+    nome_da_modalidade = modalidade_record[0]
+
+    cursor.execute("SELECT 1 FROM AULA WHERE MODALIDADE = ?", (nome_da_modalidade,))
+    aula_existente = cursor.fetchone()
+
+    if aula_existente:
+        flash(f"Não é possível excluir a modalidade '{nome_da_modalidade}', pois já existem AULAS cadastradas nela.",
+              "erro")
+        cursor.close()
+        return redirect(url_for('adminmodalidadeslista'))
+
+    cursor.execute("SELECT 1 FROM USUARIO WHERE ESPECIALIDADE = ? AND TIPO = 2", (nome_da_modalidade,))
+    professor_existente = cursor.fetchone()
+
+    if professor_existente:
+        flash(
+            f"Não é possível excluir a modalidade '{nome_da_modalidade}', pois existem PROFESSORES cadastrados com essa especialidade.",
+            "erro")
+        cursor.close()
+        return redirect(url_for('adminmodalidadeslista'))
+
     cursor.execute("DELETE FROM modalidades WHERE id_modalidade = ?", (id,))
     con.commit()
     cursor.close()
@@ -844,7 +925,7 @@ def admineditarmodalidades(id):
         return redirect(url_for('login'))
     cursor = con.cursor()
 
-    cursor.execute("SELECT moda, vaga FROM modalidades WHERE id_modalidade = ?", (id,))
+    cursor.execute("SELECT moda, vagas FROM modalidades WHERE id_modalidade = ?", (id,))
     modalidade = cursor.fetchone()
 
     if not modalidade:
@@ -919,7 +1000,14 @@ def adminadicionaraula():
 
     cursor = con.cursor()
     # Buscar lista de professores com especialidade
-    cursor.execute("SELECT ID_USUARIO, NOME, ESPECIALIDADE FROM USUARIO WHERE TIPO = 2")
+    cursor.execute("""SELECT 
+            U.ID_USUARIO, 
+            U.NOME, 
+            U.ESPECIALIDADE,
+            M.VAGAS
+        FROM USUARIO AS U
+        LEFT JOIN MODALIDADES AS M ON U.ESPECIALIDADE = M.MODA
+        WHERE U.TIPO = 2""")
     professores = cursor.fetchall()  # cada item: (id, nome, especialidade)
 
     if request.method == 'POST':

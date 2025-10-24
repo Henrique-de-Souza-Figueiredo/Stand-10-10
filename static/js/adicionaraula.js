@@ -1,17 +1,24 @@
+// Selecionar elementos (Adicionar o capacidadeInput)
 const form = document.querySelector('.formulario');
 const professorSelect = document.getElementById('professor_id');
 const modalidadeInput = document.getElementById('modalidade');
+const capacidadeInput = document.getElementById('capacidade'); // <-- ADICIONAR ESTA LINHA
 const dataInput = document.querySelector('input[name="data_aula"]');
 const horarioInicio = document.querySelector('input[name="horario"]');
 const horarioFinal = document.querySelector('input[name="horario_final"]');
 
-// Atualiza automaticamente o campo "modalidade" conforme o professor selecionado
+// Atualiza automaticamente os campos "modalidade" E "capacidade"
 professorSelect.addEventListener('change', () => {
   const selectedOption = professorSelect.options[professorSelect.selectedIndex];
+
+  // Atualiza modalidade
   modalidadeInput.value = selectedOption.dataset.especialidade || '';
+
+  // ATUALIZAR: Adiciona a lógica para capacidade
+  capacidadeInput.value = selectedOption.dataset.capacidade || '';
 });
 
-// Validação antes de enviar o formulário
+// Validação antes de enviar o formulário (SEU CÓDIGO ORIGINAL, ESTÁ CORRETO)
 form.addEventListener('submit', (event) => {
   const hoje = new Date();
   const dataSelecionada = new Date(dataInput.value + "T00:00");

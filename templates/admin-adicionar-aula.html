@@ -31,9 +31,11 @@
   <h1>Adicionar Aula</h1>
 
    <select id="professor_id" name="professor_id">
-    <option value="" data-especialidade="">Selecionar professor</option>
+    <option value="" data-especialidade="" data-capacidade="">Selecionar professor</option>
     {% for professor in professores %}
-        <option value="{{ professor[0] }}" data-especialidade="{{ professor[2] }}">
+        <option value="{{ professor[0] }}"
+                data-especialidade="{{ professor[2] }}"
+                data-capacidade="{{ professor[3] }}">
             {{ professor[1] }}
         </option>
     {% endfor %}
@@ -49,7 +51,7 @@
 
   <input type="time" name="horario_final" placeholder="Horário de termino" required>
 
-  <input type="number" min="10"  max="20" name="capacidade" placeholder="Vagas" required>
+  <input type="number" id="capacidade" name="capacidade" placeholder="Vagas" readonly required>
 
   <input type="text" id="modalidade" name="modalidade" placeholder="Modalidade / Especialidade do professor" readonly required>
 
