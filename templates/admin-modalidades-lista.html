@@ -94,9 +94,9 @@
         {% for modalidade in modali %}
         <ul>
             <li class="lista-item">
-                <p class="id">{{ modalidades[0] }}</p>
-                <p><strong>Nome:</strong> {{ modalidades[1] }}</p>
-                <p><strong>Email:</strong> {{ modalidades[2] }}</p>
+                <p class="id">{{ modalidade[0] }}</p>
+                <p><strong>Nome:</strong> {{ modalidade[1] }}</p>
+                <p><strong>Vagas:</strong> {{ modalidade[2] }}</p>
                 <div class="item-texto">
                 <div class="item-actions">
                      <a href="{{ url_for('admineditarmodalidades', id=modalidade[0]) }}" class="btn btn-editar">Editar</a>

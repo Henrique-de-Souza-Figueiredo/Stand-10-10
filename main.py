@@ -448,7 +448,7 @@ def adminprofessoreslista():
         return redirect(url_for('login'))
 
     cursor = con.cursor()
-    cursor.execute("select id_usuario, nome, email, tentativas  from USUARIO WHERE tipo = 2")
+    cursor.execute("select id_usuario, nome, email, especialidade, tentativas  from USUARIO WHERE tipo = 2")
     profli = cursor.fetchall()
     cursor.close()
     return render_template('admin-professores-lista.html', profli=profli, titulo='Dashboard admin lista professores')
@@ -771,11 +771,11 @@ def adminmodalidadeslista():
         return redirect(url_for('login'))
 
     cursor = con.cursor()
-    cursor.execute("SELECT ID_MODALIDADE, MODA, VAGAS FROM MODALIDADE")
+    cursor.execute("SELECT ID_MODALIDADE, MODA, VAGAS FROM MODALIDADES")
     modali = cursor.fetchall()
     cursor.close()
 
-    return render_template('admin-modalidades-listas.html', modali=modali, titulo='Dashboard admin lista aulas')
+    return render_template('admin-modalidades-lista.html', modali=modali, titulo='Dashboard admin lista aulas')
 
 @app.route('/adminadicionarmodalidades', methods=['POST','GET'])
 def adminadicionarmodalidades():
@@ -815,7 +815,7 @@ def adminexcluirmodalidades(id):
 
     if request.method == 'GET':
         # Busca o aviso pelo ID e mostra a tela de confirmação
-        cursor.execute("SELECT id_modadlidade, moda, vagas FROM modalidades WHERE id_modalidade = ?", (id,))
+        cursor.execute("SELECT id_modalidade, moda, vagas FROM modalidades WHERE id_modalidade = ?", (id,))
         modalidade = cursor.fetchone()
         cursor.close()
 

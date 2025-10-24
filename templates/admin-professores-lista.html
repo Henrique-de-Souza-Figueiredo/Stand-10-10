@@ -95,11 +95,12 @@
                 <p class="id">{{ usuario[0] }}</p>
                 <p><strong>Nome:</strong> {{ usuario[1] }}</p>
                 <p><strong>Email:</strong> {{ usuario[2] }}</p>
+                <p><strong>Especialidade:</strong> {{ usuario[3] }}</p>
                 <div class="item-actions">
                     <a href="{{ url_for('admineditarprofessor', id=usuario[0]) }}" class="btn btn-editar">Editar Conta</a>
                     <a href="{{ url_for('adminexcluirprofessor', id=usuario[0]) }}" class="btn btn-deletar">Excluir Conta</a>
 
-                    {% if usuario[3] >= 3 %}
+                    {% if usuario[4] >= 3 %}
                         <form action="{{ url_for('adminresetartentativas') }}" method="POST" style="display:inline;">
                             <input type="hidden" name="id_usuario" value="{{ usuario[0] }}">
                             <button type="submit" class="btn btn-resetar">Resetar Tentativas</button>
