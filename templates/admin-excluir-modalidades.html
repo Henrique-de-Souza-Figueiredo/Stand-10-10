@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <link rel="icon" type="image/png" href="../static/img/Logo-aba.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../static/css/style.css">
+  <link rel="stylesheet" href="../static/css/responsivo.css">
+  <title>Excluir aviso</title>
+</head>
+
+<body>
+  <header class="sem-login">
+    <img alt="Logo da Stand" class="logo" src="../static/img/stand.png">
+  </header>
+
+  <main class="excluir">
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+        {% for categoria, msg in mensagens %}
+        <section class="flash_{{ 'bom' if categoria == 'success' else 'erro' }}">
+            <div class="mensagens">
+                <p>{{ msg }}</p>
+            </div>
+        </section>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    <div class="container-excluir">
+  <h1>Realmente deseja excluir esse aviso?</h1>
+
+  <div class="botoes-excluir">
+    <a class="btn-confirm btn-nao" href="{{ url_for('adminmodalidadeslista') }}">Não</a>
+    <form action="{{ url_for('adminexcluirmodalidades', id=modalidade[0]) }}" method="POST">
+      <button type="submit" class="btn-confirm btn-sim">Sim</button>
+    </form>
+  </div>
+</div>
+  </main>
+
+  <footer class="alinhaitem">
+    <img class="logotop" src="../static/img/stand.png" alt="Logo">
+
+    <div class="linha"></div>
+
+    <p>Siga a Stand</p>
+
+    <div class="imagens">
+       <a href="https://web.whatsapp.com/"><img class="um" src="../static/img/whatzapp.png" alt="Logo whatzapp"></a>
+      <a href="https://www.facebook.com/"><img class="um" src="../static/img/facebook.png" alt="Logo facebook"></a>
+      <a href="https://www.instagram.com/"><img class="um" src="../static/img/instagram.png" alt="Logo instagram"></a>
+      <a href="https://www.youtube.com/"><img class="um" src="../static/img/youtube.png" alt="Logo youtube"></a>
+      <a href="https://web.telegram.org/"><img class="um" src="../static/img/telegram.png" alt="Logo telegram"></a>
+    </div>
+
+    <div class="linha"></div>
+  </footer>
+
+</body>
+
+</html>

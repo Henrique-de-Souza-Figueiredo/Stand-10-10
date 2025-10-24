@@ -761,6 +761,116 @@ def adminadicionarusuario():
     return render_template('admin-adicionar-usuario.html')
 
 
+@app.route('/adminmodalidadeslista')
+def adminmodalidadeslista():
+    if 'id_usuario' not in session:
+        flash('Você precisa estar logado para acessar essa página.', 'erro')
+        return redirect(url_for('login'))
+
+    if session.get('tipo') != 3:
+        flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
+        return redirect(url_for('login'))
+
+    cursor = con.cursor()
+    cursor.execute("SELECT ID_MODALIDADE, MODA, VAGAS FROM MODALIDADE")
+    modali = cursor.fetchall()
+    cursor.close()
+
+    return render_template('admin-modalidades-listas.html', modali=modali, titulo='Dashboard admin lista aulas')
+
+@app.route('/adminadicionarmodalidades', methods=['POST','GET'])
+def adminadicionarmodalidades():
+    if 'id_usuario' not in session:
+        flash('Você precisa estar logado para acessar essa página.', 'erro')
+        return redirect(url_for('login'))
+
+    if session.get('tipo') != 3:
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        moda = request.form['moda']
+        vagas = request.form['vagas']
+
+        cursor = con.cursor()
+        cursor.execute("INSERT INTO modalidades (moda, vagas) VALUES (?, ?)", (moda, vagas))
+        con.commit()
+        cursor.close()
+        flash('Modalidade adicionado com sucesso!', 'success')
+        return redirect(url_for('adminmodalidadeslista'))
+
+    return render_template('admin-adicionar-modalidades.html', titulo='Adicionar modalidade')
+
+
+@app.route('/adminexcluirmodalidades/<int:id>', methods=['GET', 'POST'])
+def adminexcluirmodalidades(id):
+    if 'id_usuario' not in session:
+        flash('Você precisa estar logado para acessar essa página.', 'erro')
+        return redirect(url_for('login'))
+
+    if session.get('tipo') != 3:
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
+        return redirect(url_for('login'))
+
+    cursor = con.cursor()
+
+    if request.method == 'GET':
+        # Busca o aviso pelo ID e mostra a tela de confirmação
+        cursor.execute("SELECT id_modadlidade, moda, vagas FROM modalidades WHERE id_modalidade = ?", (id,))
+        modalidade = cursor.fetchone()
+        cursor.close()
+
+        if not modalidade:
+            flash("Aviso não encontrado.", "erro")
+            return redirect(url_for('adminmodalidadeslista'))
+
+        return render_template('admin-excluir-modalidades.html', modalidade=modalidade)
+
+    # Se for POST, realmente exclui
+    cursor.execute("DELETE FROM modalidades WHERE id_modalidade = ?", (id,))
+    con.commit()
+    cursor.close()
+
+    flash("Modalidade excluída com sucesso!", "success")
+    return redirect(url_for('adminmodalidadeslista'))
+
+@app.route('/admineditarmodalidades/<int:id>', methods=['GET', 'POST'])
+def admineditarmodalidades(id):
+    if 'id_usuario' not in session:
+        flash('Você precisa estar logado para acessar essa página.', 'erro')
+        return redirect(url_for('login'))
+
+    if session.get('tipo') != 3:
+        flash('Acesso negado. Somente administradores nessa pagina', 'erro')
+        return redirect(url_for('login'))
+    cursor = con.cursor()
+
+    cursor.execute("SELECT moda, vaga FROM modalidades WHERE id_modalidade = ?", (id,))
+    modalidade = cursor.fetchone()
+
+    if not modalidade:
+        cursor.close()
+        flash('Modalidade não encontrada.', 'erro')
+        return redirect(url_for('adminmodalidadeslista'))
+
+    moda_atual, vagas_atual = modalidade
+
+    if request.method == 'POST':
+        moda = request.form['moda']
+        vagas = request.form['vagas']
+
+        cursor.execute("UPDATE modalidades SET moda = ?, vagas = ? WHERE id_modalidades = ?",
+                       (moda, vagas, id))
+        con.commit()
+        cursor.close()
+
+        flash('Aviso atualizado com sucesso!', 'success')
+        return redirect(url_for('adminmodalidadeslista'))
+
+    cursor.close()
+    return render_template('admin-editar-modalidades.html', moda_atual=moda_atual, vagas_atual=vagas_atual, id=id)
+
+
 @app.route('/adminaulaslista')
 def adminaulaslista():
     if 'id_usuario' not in session:
