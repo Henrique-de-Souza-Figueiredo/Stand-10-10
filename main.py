@@ -153,7 +153,7 @@ def alunoaulaslista():
 
         if acao == 'inscrever':
             cursor.execute("SELECT 1 FROM AULA_ALUNO WHERE ID_ALUNO = ? AND ID_AULA = ?", (id_aluno, id_aula))
-            ja_inscrito = cursor.fetchone()[0]
+            ja_inscrito = cursor.fetchone()
 
             if ja_inscrito:
                 flash('Você já está inscrito nesta aula.', 'erro')
