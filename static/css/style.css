@@ -1182,18 +1182,17 @@ select {
     -moz-appearance: none;
 
     display: block;          /* Ocupa a largura total */
-    width: 90%;             /* 100% da largura do contêiner */
+    width: 91%;             /* 100% da largura do contêiner */
     padding: 12px 14px;      /* Padding: igual ao que seus inputs parecem ter */
-    margin-bottom: 15px;     /* Espaço abaixo: igual aos seus inputs */
 
-    border: 1px solid #ccc;  /* Borda sutil: igual aos seus inputs */
-    border-radius: 5px;      /* Bordas arredondadas: igual aos seus inputs */
+    border: 1px solid var(--cor-preto);  /* Borda sutil: igual aos seus inputs */
+    border-radius: 1px;      /* Bordas arredondadas: igual aos seus inputs */
     background-color: #fff;  /* Fundo branco: igual aos seus inputs */
 
     /* --- Texto e Fonte --- */
     font-size: 1rem;         /* Tamanho da fonte */
     font-family: inherit;    /* Usa a mesma fonte do resto do corpo */
-    color: #333;             /* Cor do texto: igual aos seus inputs */
+    color: var(--cor-preto);             /* Cor do texto: igual aos seus inputs */
     line-height: 1.5;
 
     /* --- Seta personalizada (Dropdown Arrow) --- */
@@ -1207,12 +1206,12 @@ select {
 
 /* --- Estados (Hover e Focus) --- */
 select:hover {
-    border-color: #0000; /* Borda um pouco mais escura no hover */
+    border-color: var(--cor-verde-claro); /* Borda um pouco mais escura no hover */
 }
 
 select:focus {
     outline: none;           /* Remove o outline padrão */
-    border-color: #007bff;   /* Cor de foco (ajuste se seus inputs tiverem outra) */
+    border-color: var(--cor-principal);   /* Cor de foco (ajuste se seus inputs tiverem outra) */
     box-shadow: 0 0 5px rgba(0,123,255,0.3); /* Sombra de foco suave */
 }
 
