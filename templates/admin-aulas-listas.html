@@ -91,36 +91,193 @@
             </div>
 
     <div class="lista-scroll">
-        {% for aula in aulas %}
-        <ul>
+
+    <h2 class="dia-titulo">Segunda-feira</h2>
+
+    {% if aulas_segunda %}
+        <ul> {% for aula in aulas_segunda %}
             <li class="lista-item">
                 <div class="item-texto">
                     <p class="id">{{ aula[0] }}</p>
                     <p class="item-name">{{ aula[1] }}</p>
                     <p class="item-descricao">{{ aula[2] }}</p>
                 </div>
-                 <div class="item-texto">
-                    <p class="item-data">Data: {{ aula[3] }}</p>
+                <div class="item-texto">
                     <p class="item-horario">Horário Inicio: {{ aula[4] }}</p>
                     <p class="item-horario">Horário Final: {{ aula[5] }}</p>
-                     </div>
+                </div>
                 <div class="item-texto">
                     <p class="item-professor">Professor: {{ aula[7] }}</p>
                     <p class="item-modalidade">Modalidade: {{ aula[8] }}</p>
                 </div>
                 <div class="item-texto">
-                <p class="item-capacidade">Vagas: {{ aula[6] }} / {{ aula[9] }}</p>
-                 </div>
+                    <p class="item-capacidade">Vagas: {{ aula[6] }} / {{ aula[9] }}</p>
+                </div>
                 <div class="item-texto">
-                <div class="item-actions">
-                    <a href="{{ url_for('adminalunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
-                    <a href="{{ url_for('adminexcluiraula', aula_id=aula[0]) }}" class="btn btn-deletar">Cancelar Aula</a>
-                    <a href="{{ url_for('admineditaraula', id=aula[0]) }}" class="btn btn-editar">Editar Aula</a>
+                    <div class="item-actions">
+                        <a href="{{ url_for('adminalunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                        <a href="{{ url_for('adminexcluiraula', aula_id=aula[0]) }}" class="btn btn-deletar">Cancelar Aula</a>
+                        <a href="{{ url_for('admineditaraula', id=aula[0]) }}" class="btn btn-editar">Editar Aula</a>
+                    </div>
                 </div>
             </li>
+            {% endfor %}
         </ul>
-        {% endfor %}
-        </div>
+    {% else %}
+        <p class="sem-aulas">Nenhuma aula cadastrada para Segunda-feira.</p>
+    {% endif %}
+    <hr class="separador-dia"> <h2 class="dia-titulo">Terça-feira</h2>
+
+    {% if aulas_terca %}
+        <ul>
+            {% for aula in aulas_terca %}
+            <li class="lista-item">
+                <div class="item-texto">
+                    <p class="id">{{ aula[0] }}</p>
+                    <p class="item-name">{{ aula[1] }}</p>
+                    <p class="item-descricao">{{ aula[2] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-horario">Horário Inicio: {{ aula[4] }}</p>
+                    <p class="item-horario">Horário Final: {{ aula[5] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-professor">Professor: {{ aula[7] }}</p>
+                    <p class="item-modalidade">Modalidade: {{ aula[8] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-capacidade">Vagas: {{ aula[6] }} / {{ aula[9] }}</p>
+                </div>
+                <div class="item-texto">
+                    <div class="item-actions">
+                        <a href="{{ url_for('adminalunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                        <a href="{{ url_for('adminexcluiraula', aula_id=aula[0]) }}" class="btn btn-deletar">Cancelar Aula</a>
+                        <a href="{{ url_for('admineditaraula', id=aula[0]) }}" class="btn btn-editar">Editar Aula</a>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="sem-aulas">Nenhuma aula cadastrada para Terça-feira.</p>
+    {% endif %}
+    <hr class="separador-dia">
+
+
+    <h2 class="dia-titulo">Quarta-feira</h2>
+
+    {% if aulas_quarta %}
+        <ul>
+            {% for aula in aulas_quarta %}
+            <li class="lista-item">
+                <div class="item-texto">
+                    <p class="id">{{ aula[0] }}</p>
+                    <p class="item-name">{{ aula[1] }}</p>
+                    <p class="item-descricao">{{ aula[2] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-horario">Horário Inicio: {{ aula[4] }}</p>
+                    <p class="item-horario">Horário Final: {{ aula[5] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-professor">Professor: {{ aula[7] }}</p>
+                    <p class="item-modalidade">Modalidade: {{ aula[8] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-capacidade">Vagas: {{ aula[6] }} / {{ aula[9] }}</p>
+                </div>
+                <div class="item-texto">
+                    <div class="item-actions">
+                        <a href="{{ url_for('adminalunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                        <a href="{{ url_for('adminexcluiraula', aula_id=aula[0]) }}" class="btn btn-deletar">Cancelar Aula</a>
+                        <a href="{{ url_for('admineditaraula', id=aula[0]) }}" class="btn btn-editar">Editar Aula</a>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="sem-aulas">Nenhuma aula cadastrada para Quarta-feira.</p>
+    {% endif %}
+    <hr class="separador-dia">
+
+
+    <h2 class="dia-titulo">Quinta-feira</h2>
+
+    {% if aulas_quinta %}
+        <ul>
+            {% for aula in aulas_quinta %}
+            <li class="lista-item">
+                <div class="item-texto">
+                    <p class="id">{{ aula[0] }}</p>
+                    <p class="item-name">{{ aula[1] }}</p>
+                    <p class="item-descricao">{{ aula[2] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-horario">Horário Inicio: {{ aula[4] }}</p>
+                    <p class="item-horario">Horário Final: {{ aula[5] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-professor">Professor: {{ aula[7] }}</p>
+                    <p class="item-modalidade">Modalidade: {{ aula[8] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-capacidade">Vagas: {{ aula[6] }} / {{ aula[9] }}</p>
+                </div>
+                <div class="item-texto">
+                    <div class="item-actions">
+                        <a href="{{ url_for('adminalunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                        <a href="{{ url_for('adminexcluiraula', aula_id=aula[0]) }}" class="btn btn-deletar">Cancelar Aula</a>
+                        <a href="{{ url_for('admineditaraula', id=aula[0]) }}" class="btn btn-editar">Editar Aula</a>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="sem-aulas">Nenhuma aula cadastrada para Quinta-feira.</p>
+    {% endif %}
+    <hr class="separador-dia">
+
+
+    <h2 class="dia-titulo">Sexta-feira</h2>
+
+    {% if aulas_sexta %}
+        <ul>
+            {% for aula in aulas_sexta %}
+            <li class="lista-item">
+                <div class="item-texto">
+                    <p class="id">{{ aula[0] }}</p>
+                    <p class="item-name">{{ aula[1] }}</p>
+                    <p class="item-descricao">{{ aula[2] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-horario">Horário Inicio: {{ aula[4] }}</p>
+                    <p class="item-horario">Horário Final: {{ aula[5] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-professor">Professor: {{ aula[7] }}</p>
+                    <p class="item-modalidade">Modalidade: {{ aula[8] }}</p>
+                </div>
+                <div class="item-texto">
+                    <p class="item-capacidade">Vagas: {{ aula[6] }} / {{ aula[9] }}</p>
+                </div>
+                <div class="item-texto">
+                    <div class="item-actions">
+                        <a href="{{ url_for('adminalunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                        <a href="{{ url_for('adminexcluiraula', aula_id=aula[0]) }}" class="btn btn-deletar">Cancelar Aula</a>
+                        <a href="{{ url_for('admineditaraula', id=aula[0]) }}" class="btn btn-editar">Editar Aula</a>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="sem-aulas">Nenhuma aula cadastrada para Sexta-feira.</p>
+    {% endif %}
+    <hr class="separador-dia">
+
+</div>
         </div>
 
     </main>

@@ -41,11 +41,17 @@
     {% endfor %}
 </select>
 
+   <select name="data_aula" id="Data" required>
+    <option value="1">Segunda</option>
+    <option value="2">Terça</option>
+    <option value="3">Quarta</option>
+    <option value="4">Quinta</option>
+    <option value="5">Sexta</option>
+  </select>
+
   <input type="text" name="nome" placeholder="Nome da Aula" required>
 
   <input type="text" maxlength="20" name="descricao" placeholder="Digite a Descrição" required>
-
-  <input type="date" name="data_aula" placeholder="Data" required>
 
   <input type="time" name="horario" placeholder="Horário de inicio" required>
 

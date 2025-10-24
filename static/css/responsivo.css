@@ -150,11 +150,46 @@
         display: none;
     }
 
+    .dia-titulo {
+        font-size: 1.6rem;      /* Um pouco menor que o desktop */
+        margin-top: 22px;
+        margin-bottom: 12px;
+    }
+
+    /* Ajusta a mensagem de "sem aulas" */
+    .sem-aulas {
+        font-size: 1.1rem;      /* Mantém o tamanho do desktop */
+        padding: 18px 0;
+    }
+
+    /* Diminui a margem do separador */
+    .separador-dia {
+        margin: 25px 0;
+    }
+
 }
 
 /* CELULAR */
 
 @media (max-width: 426px) {
+
+    .dia-titulo {
+        font-size: 1.3rem;      /* Significativamente menor */
+        text-align: center;     /* Centraliza o título no mobile */
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    /* Ajusta a mensagem de "sem aulas" */
+    .sem-aulas {
+        font-size: 0.95rem;     /* Diminui a fonte da mensagem */
+        padding: 15px 10px;     /* Adiciona um leve padding lateral */
+    }
+
+    /* Diminui a margem do separador */
+    .separador-dia {
+        margin: 20px 0;
+    }
 
     /* Home */
 

@@ -962,12 +962,15 @@ def adminaulaslista():
         return redirect(url_for('login'))
 
     cursor = con.cursor()
-    # Seleciona todas as aulas com informações do professor
+
+    # --- INÍCIO DA MODIFICAÇÃO 1: Atualizar a consulta SQL ---
+    # Trocamos 'A.DATA_AULA' por 'A.DIA_SEMANA'
+    # Trocamos 'ORDER BY A.DATA_AULA' por 'ORDER BY A.DIA_SEMANA'
     cursor.execute("""SELECT 
                A.ID_AULA, 
                A.NOME, 
                A.DESCRICAO, 
-               A.DATA_AULA, 
+               A.DIA_SEMANA,  -- Alterado
                A.HORARIO, 
                A.HORARIO_FINAL, 
                A.CAPACIDADE, 
@@ -978,14 +981,51 @@ def adminaulaslista():
            JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
            LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
            GROUP BY 
-               A.ID_AULA, A.NOME, A.DESCRICAO, A.DATA_AULA, 
+               A.ID_AULA, A.NOME, A.DESCRICAO, A.DIA_SEMANA,  -- Alterado
                A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME, A.MODALIDADE
-           ORDER BY A.DATA_AULA, A.HORARIO
+           ORDER BY A.DIA_SEMANA, A.HORARIO
        """)
-    aulas = cursor.fetchall()
+    # Pega todas as aulas do banco
+    aulas_db = cursor.fetchall()
     cursor.close()
 
-    return render_template('admin-aulas-listas.html', aulas=aulas, titulo='Dashboard admin lista aulas')
+    # --- INÍCIO DA MODIFICAÇÃO 2: Processar e separar as aulas ---
+
+    # 1. Criar as listas vazias
+    aulas_segunda = []
+    aulas_terca = []
+    aulas_quarta = []
+    aulas_quinta = []
+    aulas_sexta = []
+
+    # 2. Distribuir as aulas nas listas corretas
+    for aula in aulas_db:
+        # O DIA_SEMANA é o 4º item (índice 3) da nossa consulta SQL
+        dia = aula[3]
+
+        if dia == 1:
+            aulas_segunda.append(aula)
+        elif dia == 2:
+            aulas_terca.append(aula)
+        elif dia == 3:
+            aulas_quarta.append(aula)
+        elif dia == 4:
+            aulas_quinta.append(aula)
+        elif dia == 5:
+            aulas_sexta.append(aula)
+        # Aulas com dia 0 (Domingo) ou 6 (Sábado) serão ignoradas,
+        # pois o seu HTML só lista de Segunda a Sexta.
+
+    # --- INÍCIO DA MODIFICAÇÃO 3: Renderizar com as novas listas ---
+    return render_template(
+        'admin-aulas-listas.html',
+        titulo='Dashboard admin lista aulas',
+        aulas_segunda=aulas_segunda,
+        aulas_terca=aulas_terca,
+        aulas_quarta=aulas_quarta,
+        aulas_quinta=aulas_quinta,
+        aulas_sexta=aulas_sexta
+    )
 
 
 @app.route('/adminadicionaraula', methods=['GET', 'POST'])
@@ -999,34 +1039,44 @@ def adminadicionaraula():
         return redirect(url_for('login'))
 
     cursor = con.cursor()
-    # Buscar lista de professores com especialidade
-    cursor.execute("""SELECT 
+
+    # 1. Buscar professores com sua capacidade (JOIN)
+    # (Ajuste 'MODALIDADES', 'VAGAS' e 'MODA' para os nomes corretos do seu banco)
+    cursor.execute("""
+        SELECT 
             U.ID_USUARIO, 
             U.NOME, 
             U.ESPECIALIDADE,
-            M.VAGAS
+            M.VAGAS  
         FROM USUARIO AS U
         LEFT JOIN MODALIDADES AS M ON U.ESPECIALIDADE = M.MODA
-        WHERE U.TIPO = 2""")
-    professores = cursor.fetchall()  # cada item: (id, nome, especialidade)
+        WHERE U.TIPO = 2
+    """)
+    professores = cursor.fetchall()  # cada item: (id, nome, especialidade, vagas)
 
     if request.method == 'POST':
+        # 2. Ler os dados do formulário
         nome = request.form['nome']
         descricao = request.form.get('descricao')
-        data_aula = request.form['data_aula']
+
+        # O HTML <select> chama-se 'data_aula', mas envia o dia da semana
+        # (Renomeei a variável para clareza)
+        dia_semana = request.form['data_aula']
+
         horario = request.form['horario']
         horario_final = request.form['horario_final']
         capacidade = request.form.get('capacidade')
         professor_id = request.form['professor_id']
 
-        # Verificar se já existe aula do mesmo professor no mesmo horário
+        # 3. Verificar conflito com base no DIA_SEMANA
+        # (Usando a lógica de sobreposição melhorada)
         cursor.execute("""
                     SELECT 1 FROM AULA 
                     WHERE PROFESSOR_ID = ? 
-                      AND DATA_AULA = ? 
-                      AND ((? BETWEEN HORARIO AND HORARIO_FINAL) OR (? BETWEEN HORARIO AND HORARIO_FINAL)
-                           OR (HORARIO BETWEEN ? AND ?) OR (HORARIO_FINAL BETWEEN ? AND ?))
-                """, (professor_id, data_aula, horario, horario_final, horario, horario_final, horario, horario_final))
+                      AND DIA_SEMANA = ?   -- <-- CORRIGIDO
+                      AND (HORARIO < ?) 
+                      AND (HORARIO_FINAL > ?)
+                """, (professor_id, dia_semana, horario_final, horario))
         conflito = cursor.fetchone()
 
         cursor.execute("SELECT 1 FROM AULA WHERE NOME = ?", (nome,))
@@ -1038,27 +1088,31 @@ def adminadicionaraula():
             return redirect(url_for('adminadicionaraula'))
 
         if conflito:
-            flash('O professor já possui uma aula nesse horário!', 'erro')
+            flash('O professor já possui uma aula nesse dia e horário!', 'erro')
             cursor.close()
             return redirect(url_for('adminadicionaraula'))
 
-        # Pega a modalidade do professor selecionado
+        # Pega a modalidade do professor
         cursor.execute("SELECT ESPECIALIDADE FROM USUARIO WHERE ID_USUARIO = ?", (professor_id,))
         resultado = cursor.fetchone()
         modalidade = resultado[0] if resultado else ''
 
-        # Inserir aula no banco
-        cursor.execute("INSERT INTO AULA (NOME, DESCRICAO, DATA_AULA, HORARIO, HORARIO_FINAL, CAPACIDADE, PROFESSOR_ID, MODALIDADE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (nome, descricao, data_aula, horario, horario_final, capacidade, professor_id, modalidade))
+        # 4. Inserir no banco com DIA_SEMANA
+        cursor.execute("""
+            INSERT INTO AULA 
+                (NOME, DESCRICAO, DIA_SEMANA, HORARIO, HORARIO_FINAL, CAPACIDADE, PROFESSOR_ID, MODALIDADE) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,(nome, descricao, dia_semana, horario, horario_final, capacidade, professor_id, modalidade))
 
         con.commit()
         cursor.close()
         flash('Aula adicionada com sucesso!', 'success')
         return redirect(url_for('adminaulaslista'))
 
+    # Se for GET, apenas renderiza a página com a lista de professores
     cursor.close()
-    return render_template('admin-adicionar-aula.html', professores=professores, titulo='Dashboard admin adicionar aula')
-
+    return render_template('admin-adicionar-aula.html', professores=professores,
+                           titulo='Dashboard admin adicionar aula')
 
 @app.route('/adminalunosmatriculados/<int:aula_id>')
 def adminalunosmatriculados(aula_id):
@@ -1086,7 +1140,6 @@ def adminalunosmatriculados(aula_id):
     return render_template('admin-alunos-matriculados.html', aula=aula, alunosmatriculado=alunosmatriculado)
 
 
-
 @app.route('/admineditaraula/<int:id>', methods=['GET', 'POST'])
 def admineditaraula(id):
     if 'id_usuario' not in session:
@@ -1099,13 +1152,13 @@ def admineditaraula(id):
 
     cursor = con.cursor()
 
-    # Buscar professores
     cursor.execute("SELECT ID_USUARIO, NOME, ESPECIALIDADE FROM USUARIO WHERE TIPO = 2")
     professores = cursor.fetchall()
 
-    # Buscar dados da aula
-    cursor.execute("SELECT ID_AULA, NOME, DESCRICAO, DATA_AULA, HORARIO, HORARIO_FINAL FROM AULA WHERE ID_AULA = ?",
-                   (id,))
+    cursor.execute("""
+        SELECT ID_AULA, NOME, DESCRICAO, DIA_SEMANA, HORARIO, HORARIO_FINAL, PROFESSOR_ID 
+        FROM AULA WHERE ID_AULA = ?
+    """, (id,))
     aula = cursor.fetchone()
 
     if not aula:
@@ -1113,15 +1166,18 @@ def admineditaraula(id):
         cursor.close()
         return redirect(url_for('adminaulaslista'))
 
-    # Atualizar aula
+    professor_id_original = aula[6]
+
     if request.method == 'POST':
         nome = request.form['nome']
         descricao = request.form['descricao']
-        data_aula = request.form['data_aula']
+
+        dia_semana = request.form['data_aula']
+
         horario = request.form['horario']
         horario_final = request.form['horario_final']
 
-        cursor.execute("SELECT 1 FROM AULA WHERE NOME = ? AND ID_AULA != ?", (nome,id))
+        cursor.execute("SELECT 1 FROM AULA WHERE NOME = ? AND ID_AULA != ?", (nome, id))
         conflito_nome = cursor.fetchone()
 
         if conflito_nome:
@@ -1129,8 +1185,27 @@ def admineditaraula(id):
             cursor.close()
             return redirect(url_for('admineditaraula', id=id))
 
-        cursor.execute("UPDATE AULA SET NOME = ?, DESCRICAO = ?, DATA_AULA = ?, HORARIO = ?, HORARIO_FINAL = ? WHERE ID_AULA = ?",
-                       (nome, descricao, data_aula, horario, horario_final, id))
+        cursor.execute("""
+            SELECT 1 FROM AULA 
+            WHERE PROFESSOR_ID = ? 
+              AND DIA_SEMANA = ? 
+              AND (HORARIO < ?) 
+              AND (HORARIO_FINAL > ?)
+              AND ID_AULA != ? 
+        """, (professor_id_original, dia_semana, horario_final, horario, id))
+        conflito_horario = cursor.fetchone()
+
+        if conflito_horario:
+            flash('Este professor já possui outra aula que conflita com este novo dia/horário!', 'erro')
+            cursor.close()
+
+            return redirect(url_for('admineditaraula', id=id))
+
+        cursor.execute("""
+            UPDATE AULA 
+            SET NOME = ?, DESCRICAO = ?, DIA_SEMANA = ?, HORARIO = ?, HORARIO_FINAL = ? 
+            WHERE ID_AULA = ?
+        """, (nome, descricao, dia_semana, horario, horario_final, id))
 
         con.commit()
         cursor.close()
@@ -1140,7 +1215,6 @@ def admineditaraula(id):
 
     cursor.close()
     return render_template('admin-editar-aula.html', aula=aula, professores=professores, titulo='Editar Aula')
-
 
 @app.route('/adminexcluiraula/<int:aula_id>', methods=['GET', 'POST'])
 def adminexcluiraula(aula_id):

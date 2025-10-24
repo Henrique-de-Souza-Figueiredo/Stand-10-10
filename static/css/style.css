@@ -1149,3 +1149,82 @@ h5 {
     background-color: var(--cor-verde);
 }
 
+.dia-titulo {
+    font-size: 1.75rem;     /* Tamanho de fonte grande para o título do dia */
+    color: #333;           /* Cor escura para o texto */
+    margin-top: 25px;      /* Espaço acima do título */
+    margin-bottom: 15px;   /* Espaço abaixo do título, antes da lista */
+    padding-bottom: 8px;   /* Espaço interno para a linha */
+    border-bottom: 2px solid #eee; /* Uma linha sutil abaixo do título */
+}
+
+/* A mensagem de "Nenhuma aula cadastrada..." */
+.sem-aulas {
+    text-align: center;    /* Centraliza a mensagem */
+    font-style: italic;  /* Deixa o texto em itálico */
+    color: #888;         /* Cor cinza, indicando um estado "vazio" */
+    padding: 20px 0;     /* Espaçamento para a mensagem respirar */
+    font-size: 1.1rem;
+}
+
+/* A linha horizontal que separa os dias */
+.separador-dia {
+    border: 0;                          /* Remove a borda padrão do <hr> */
+    border-top: 1px solid #ccc;       /* Adiciona uma linha cinza mais suave */
+    margin: 30px 0;                   /* Espaçamento vertical grande para separar as seções */
+    opacity: 0.7;                     /* Deixa a linha um pouco transparente */
+}
+
+select {
+    /* --- Aparência e Caixa (ajustado para seus inputs) --- */
+    appearance: none;        /* Remove o estilo padrão do SO */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    display: block;          /* Ocupa a largura total */
+    width: 90%;             /* 100% da largura do contêiner */
+    padding: 12px 14px;      /* Padding: igual ao que seus inputs parecem ter */
+    margin-bottom: 15px;     /* Espaço abaixo: igual aos seus inputs */
+
+    border: 1px solid #ccc;  /* Borda sutil: igual aos seus inputs */
+    border-radius: 5px;      /* Bordas arredondadas: igual aos seus inputs */
+    background-color: #fff;  /* Fundo branco: igual aos seus inputs */
+
+    /* --- Texto e Fonte --- */
+    font-size: 1rem;         /* Tamanho da fonte */
+    font-family: inherit;    /* Usa a mesma fonte do resto do corpo */
+    color: #333;             /* Cor do texto: igual aos seus inputs */
+    line-height: 1.5;
+
+    /* --- Seta personalizada (Dropdown Arrow) --- */
+    /* Usamos uma seta SVG customizada para substituir a do navegador */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center; /* Posição da seta */
+    background-size: 1px 16px;             /* Tamanho da seta */
+    padding-right: 40px; /* Garante que o texto não sobreponha a seta */
+}
+
+/* --- Estados (Hover e Focus) --- */
+select:hover {
+    border-color: #0000; /* Borda um pouco mais escura no hover */
+}
+
+select:focus {
+    outline: none;           /* Remove o outline padrão */
+    border-color: #007bff;   /* Cor de foco (ajuste se seus inputs tiverem outra) */
+    box-shadow: 0 0 5px rgba(0,123,255,0.3); /* Sombra de foco suave */
+}
+
+/* --- Estilo para a primeira opção (placeholder) --- */
+select option[value=""] {
+    color: #999;        /* Cor cinza para o placeholder */
+    font-style: italic; /* Itálico para o placeholder */
+}
+
+/* Cor das opções quando o dropdown está aberto */
+select option {
+    color: #333;       /* Cor normal para as opções */
+    font-style: normal;
+}
+
