@@ -152,7 +152,7 @@ def alunoaulaslista():
         acao = request.form['acao']
 
         if acao == 'inscrever':
-            cursor.execute("SELECT COUNT(*) FROM AULA_ALUNO WHERE ID_ALUNO = ? AND ID_AULA = ?", (id_aluno, id_aula))
+            cursor.execute("SELECT 1 FROM AULA_ALUNO WHERE ID_ALUNO = ? AND ID_AULA = ?", (id_aluno, id_aula))
             ja_inscrito = cursor.fetchone()[0]
 
             if ja_inscrito:
