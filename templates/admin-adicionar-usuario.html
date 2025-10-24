@@ -35,12 +35,20 @@
     <option value="2">Professor</option>
     <option value="3">Admin</option>
   </select>
+    <select name="especialidade" id="campo-especialidade">
+        <option value="">Selecione uma modalidade</option>
+    {% for m in modalidades %}
+        <option value="{{ modalidades[0] }}">
+            {{ modalidade[1] }}
+        </option>
+    {% endfor %}
+</select>
+
 
   <input type="text" name="nome" placeholder="Digite o Nome" required>
   <input type="email" name="email" placeholder="Digite o Email" required>
   <input type="tel" minlength="10" maxlength="11" pattern="[0-9]{10,11}" inputmode="numeric"
    oninput="this.value = this.value.replace(/\D/g, '').slice(0,11);" title="Digite apenas números, 10 a 11 dígitos" name="telefone" placeholder="Digite o Telefone" required>
-  <input type="text" name="especialidade" placeholder="Especialidade" id="campo-especialidade">
   <input type="password" minlength="8" maxlength="16" name="senha" placeholder="Crie a Senha" required>
   <input type="password" minlength="8" maxlength="16" name="confsenha" placeholder="Confirme a Senha" required>
   <a href="{{ url_for('dashbordadmin') }}">Cancelar</a>

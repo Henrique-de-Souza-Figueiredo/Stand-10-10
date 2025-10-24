@@ -700,6 +700,11 @@ def adminadicionarusuario():
         flash('Acesso negado. Somente administradores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
+    cursor = con.cursor()
+    cursor.execute("SELECT ID_MODALIDADE, MODA FROM MODALIDADES")
+    modalidades = cursor.fetchall()
+    cursor.close()
+
     if request.method == 'POST':
         tipo = int(request.form['tipos'])
         nome = request.form['nome']
@@ -715,15 +720,11 @@ def adminadicionarusuario():
             cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
             if cursor.fetchone():
                 flash("Este email já está cadastrado!", 'erro')
-                return render_template('admin-adicionar-usuario.html',
-                                       nome=nome, email=email, telefone=telefone,
-                                       especialidade=especialidade, tipos=tipo)
+                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade, tipos=tipo)
 
             if senha != confsenha:
                 flash('As senhas não conferem!', 'erro')
-                return render_template('admin-adicionar-usuario.html',
-                                       nome=nome, email=email, telefone=telefone,
-                                       especialidade=especialidade, tipos=tipo)
+                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade, tipos=tipo)
 
             maiusculo = minuscula = numero = caracterEspecial = False
             for s in senha:
@@ -738,9 +739,7 @@ def adminadicionarusuario():
 
             if not (maiusculo and minuscula and numero and caracterEspecial):
                 flash("Sua senha deve conter letra maiúscula, minúscula, número e caractere especial.", 'erro')
-                return render_template('admin-adicionar-usuario.html',
-                                       nome=nome, email=email, telefone=telefone,
-                                       especialidade=especialidade, tipos=tipo)
+                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade, tipos=tipo)
 
             senha_hash = generate_password_hash(senha)
 
@@ -758,7 +757,7 @@ def adminadicionarusuario():
         finally:
             cursor.close()
 
-    return render_template('admin-adicionar-usuario.html')
+    return render_template('admin-adicionar-usuario.html', modalidades=modalidades)
 
 
 @app.route('/adminmodalidadeslista')
