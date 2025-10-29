@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'senhastandsi,teacademia'
 
 host = 'localhost'
-database = r'C:\Users\Aluno\Desktop\Stand-10-10\BANCO.FDB'
+database = r'C:\Users\WIN11\Documents\GitHub\Stand-10-10\BANCO.FDB'
 user = 'sysdba'
 password = 'sysdba'
 
@@ -46,6 +46,7 @@ def cadastro():
 
     return render_template('cadastro.html', titulo='Novo usuario')
 
+
 @app.route('/alunodashbord')
 def alunodashbord():
     if 'id_usuario' not in session:
@@ -57,49 +58,50 @@ def alunodashbord():
         return redirect(url_for('login'))
 
     id_aluno = session['id_usuario']
+
     hoje = date.today()
-    inicio_semana = hoje - timedelta(days=hoje.weekday())
-    fim_semana = inicio_semana + timedelta(days=6)
+
+    dia_semana_hoje = hoje.weekday() + 1
 
     cursor = con.cursor()
-
     cursor.execute("""
-        SELECT COUNT(*)
-        FROM (
-            SELECT A.ID_AULA
-            FROM AULA A
-            LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-            WHERE A.DATA_AULA = ?
-            GROUP BY A.ID_AULA, A.CAPACIDADE
-            HAVING COUNT(AA.ID_ALUNO) < A.CAPACIDADE
-        ) AS sub
-    """, (hoje,))
+                   SELECT COUNT(*)
+                   FROM (SELECT A.ID_AULA
+                         FROM AULA A
+                                  LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+                         WHERE A.DIA_SEMANA = ? -- Alterado
+                         GROUP BY A.ID_AULA, A.CAPACIDADE
+                         HAVING COUNT(AA.ID_ALUNO) < A.CAPACIDADE) AS sub
+                   """, (dia_semana_hoje,))  # Passa o número do dia de hoje
     aulas_disponiveis_hoje = cursor.fetchone()[0]
 
     cursor.execute("""
-        SELECT COUNT(*)
-        FROM (SELECT A.ID_AULA
-            FROM AULA A
-            LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-            WHERE A.DATA_AULA BETWEEN ? AND ?
-            GROUP BY A.ID_AULA, A.CAPACIDADE
-            HAVING COUNT(AA.ID_ALUNO) < A.CAPACIDADE
-        ) AS sub
-    """, (inicio_semana, fim_semana))
+                   SELECT COUNT(*)
+                   FROM (SELECT A.ID_AULA
+                         FROM AULA A
+                                  LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+                         GROUP BY A.ID_AULA, A.CAPACIDADE
+                         HAVING COUNT(AA.ID_ALUNO) < A.CAPACIDADE) AS sub
+                   """)
     aulas_disponiveis_semana = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COUNT(*) FROM AULA_ALUNO AA JOIN AULA A ON AA.ID_AULA = A.ID_AULA WHERE AA.ID_ALUNO = ? AND A.DATA_AULA = ?",
-                   (id_aluno, hoje))
+    cursor.execute("""
+                   SELECT COUNT(*)
+                   FROM AULA_ALUNO AA
+                            JOIN AULA A ON AA.ID_AULA = A.ID_AULA
+                   WHERE AA.ID_ALUNO = ?
+                     AND A.DIA_SEMANA = ?
+                   """, (id_aluno, dia_semana_hoje))
     aulas_inscritas_hoje = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COUNT(*) FROM AULA_ALUNO AA JOIN AULA A ON AA.ID_AULA = A.ID_AULA WHERE AA.ID_ALUNO = ? AND A.DATA_AULA BETWEEN ? AND ?",
-                   (id_aluno, inicio_semana, fim_semana))
+    cursor.execute("SELECT COUNT(*) FROM AULA_ALUNO AA WHERE AA.ID_ALUNO = ?", (id_aluno,))
     aulas_inscritas_semana = cursor.fetchone()[0]
+
+
 
     cursor.close()
 
     return render_template('aluno-dashbord.html',titulo='Dashboard Aluno',aulas_disponiveis_hoje=aulas_disponiveis_hoje,aulas_disponiveis_semana=aulas_disponiveis_semana,aulas_inscritas_hoje=aulas_inscritas_hoje,aulas_inscritas_semana=aulas_inscritas_semana)
-
 @app.route('/alunoprofessoreslista')
 def alunoprofessoreslista():
     if 'id_usuario' not in session:
@@ -152,10 +154,24 @@ def alunoaulaslista():
         acao = request.form['acao']
 
         if acao == 'inscrever':
+            cursor.execute("""
+                           SELECT A.CAPACIDADE,
+                                  COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS
+                           FROM AULA A
+                                    LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+                           WHERE A.ID_AULA = ?
+                           GROUP BY A.ID_AULA, A.CAPACIDADE
+                           """, (id_aula,))
+            resultado_vagas = cursor.fetchone()
+            capacidade_total = resultado_vagas[0] if resultado_vagas else 0
+            vagas_ocupadas = resultado_vagas[1] if resultado_vagas else 0
+
             cursor.execute("SELECT 1 FROM AULA_ALUNO WHERE ID_ALUNO = ? AND ID_AULA = ?", (id_aluno, id_aula))
             ja_inscrito = cursor.fetchone()
 
-            if ja_inscrito:
+            if vagas_ocupadas >= capacidade_total:
+                flash('Esta aula está esgotada!', 'erro')
+            elif ja_inscrito:
                 flash('Você já está inscrito nesta aula.', 'erro')
             else:
                 cursor.execute("INSERT INTO AULA_ALUNO (ID_ALUNO, ID_AULA) VALUES (?, ?)", (id_aluno, id_aula))
@@ -165,33 +181,55 @@ def alunoaulaslista():
             cursor.execute("DELETE FROM AULA_ALUNO WHERE ID_ALUNO = ? AND ID_AULA = ?", (id_aluno, id_aula))
             con.commit()
 
+        cursor.close()
+        return redirect(url_for('alunoaulaslista'))
+
     cursor.execute("""
-        SELECT 
-            A.ID_AULA,
-            A.NOME,
-            A.DESCRICAO,
-            A.DATA_AULA,
-            A.HORARIO,
-            A.HORARIO_FINAL,
-            A.CAPACIDADE,
-            U.NOME AS PROFESSOR,
-            A.MODALIDADE,
-            COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS
-        FROM AULA A
-        JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
-        LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-        GROUP BY A.ID_AULA, A.NOME, A.DESCRICAO, A.DATA_AULA, 
-                 A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME, A.MODALIDADE
-        ORDER BY A.DATA_AULA, A.HORARIO
-    """)
-    aulas = cursor.fetchall()
+                   SELECT A.ID_AULA,
+                          A.NOME,
+                          A.DESCRICAO,
+                          A.DIA_SEMANA,                       
+                          A.HORARIO,
+                          A.HORARIO_FINAL,
+                          A.CAPACIDADE,                     
+                          U.NOME AS PROFESSOR,
+                          A.MODALIDADE,
+                          COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS 
+                   FROM AULA A
+                            JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
+                            LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+                   GROUP BY A.ID_AULA, A.NOME, A.DESCRICAO, A.DIA_SEMANA, -- Corrigido
+                            A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME, A.MODALIDADE
+                   ORDER BY A.DIA_SEMANA, A.HORARIO -- Corrigido
+                   """)
+    aulas_db = cursor.fetchall()
 
     cursor.execute("SELECT ID_AULA FROM AULA_ALUNO WHERE ID_ALUNO = ?", (id_aluno,))
     inscricoes = {row[0] for row in cursor.fetchall()}
 
-    cursor.close()
-    return render_template('aluno-aulas-lista.html', aulas=aulas, inscricoes=inscricoes, titulo='Dashboard aluno')
 
+    aulas_segunda = []
+    aulas_terca = []
+    aulas_quarta = []
+    aulas_quinta = []
+    aulas_sexta = []
+
+    for aula in aulas_db:
+        dia = aula[3]
+        if dia == 1:
+            aulas_segunda.append(aula)
+        elif dia == 2:
+            aulas_terca.append(aula)
+        elif dia == 3:
+            aulas_quarta.append(aula)
+        elif dia == 4:
+            aulas_quinta.append(aula)
+        elif dia == 5:
+            aulas_sexta.append(aula)
+
+    cursor.close()
+
+    return render_template('aluno-aulas-lista.html',titulo='Dashboard aluno',inscricoes=inscricoes, aulas_segunda=aulas_segunda,aulas_terca=aulas_terca,aulas_quarta=aulas_quarta,aulas_quinta=aulas_quinta,aulas_sexta=aulas_sexta)
 @app.route('/alunoeditarconta', methods=['GET', 'POST'])
 def alunoeditarconta():
     if 'id_usuario' not in session:
@@ -963,9 +1001,6 @@ def adminaulaslista():
 
     cursor = con.cursor()
 
-    # --- INÍCIO DA MODIFICAÇÃO 1: Atualizar a consulta SQL ---
-    # Trocamos 'A.DATA_AULA' por 'A.DIA_SEMANA'
-    # Trocamos 'ORDER BY A.DATA_AULA' por 'ORDER BY A.DIA_SEMANA'
     cursor.execute("""SELECT 
                A.ID_AULA, 
                A.NOME, 
@@ -1040,8 +1075,6 @@ def adminadicionaraula():
 
     cursor = con.cursor()
 
-    # 1. Buscar professores com sua capacidade (JOIN)
-    # (Ajuste 'MODALIDADES', 'VAGAS' e 'MODA' para os nomes corretos do seu banco)
     cursor.execute("""
         SELECT 
             U.ID_USUARIO, 
@@ -1052,15 +1085,12 @@ def adminadicionaraula():
         LEFT JOIN MODALIDADES AS M ON U.ESPECIALIDADE = M.MODA
         WHERE U.TIPO = 2
     """)
-    professores = cursor.fetchall()  # cada item: (id, nome, especialidade, vagas)
+    professores = cursor.fetchall()
 
     if request.method == 'POST':
-        # 2. Ler os dados do formulário
         nome = request.form['nome']
         descricao = request.form.get('descricao')
 
-        # O HTML <select> chama-se 'data_aula', mas envia o dia da semana
-        # (Renomeei a variável para clareza)
         dia_semana = request.form['data_aula']
 
         horario = request.form['horario']
@@ -1068,12 +1098,10 @@ def adminadicionaraula():
         capacidade = request.form.get('capacidade')
         professor_id = request.form['professor_id']
 
-        # 3. Verificar conflito com base no DIA_SEMANA
-        # (Usando a lógica de sobreposição melhorada)
         cursor.execute("""
                     SELECT 1 FROM AULA 
                     WHERE PROFESSOR_ID = ? 
-                      AND DIA_SEMANA = ?   -- <-- CORRIGIDO
+                      AND DIA_SEMANA = ?   
                       AND (HORARIO < ?) 
                       AND (HORARIO_FINAL > ?)
                 """, (professor_id, dia_semana, horario_final, horario))
@@ -1109,7 +1137,6 @@ def adminadicionaraula():
         flash('Aula adicionada com sucesso!', 'success')
         return redirect(url_for('adminaulaslista'))
 
-    # Se for GET, apenas renderiza a página com a lista de professores
     cursor.close()
     return render_template('admin-adicionar-aula.html', professores=professores,
                            titulo='Dashboard admin adicionar aula')
@@ -1126,7 +1153,6 @@ def adminalunosmatriculados(aula_id):
 
     cursor = con.cursor()
 
-    # Pega dados da aula
     cursor.execute("SELECT NOME FROM AULA WHERE ID_AULA = ?", (aula_id,))
     aula = cursor.fetchone()
 
@@ -1439,27 +1465,33 @@ def professordashbord():
         return redirect(url_for('login'))
 
     id_professor = session['id_usuario']
+
+
     hoje = date.today()
-    inicio_semana = hoje - timedelta(days=hoje.weekday())  # Segunda
-    fim_semana = inicio_semana + timedelta(days=6)  # Domingo
+
+    dia_semana_hoje = hoje.weekday() + 1
 
     cursor = con.cursor()
+
     cursor.execute("""
-            SELECT COUNT(*) FROM AULA
-            WHERE PROFESSOR_ID = ? AND DATA_AULA = ?
-        """, (id_professor, hoje))
+                   SELECT COUNT(*)
+                   FROM AULA
+                   WHERE PROFESSOR_ID = ?
+                     AND DIA_SEMANA = ?
+                   """, (id_professor, dia_semana_hoje))
     total_hoje = cursor.fetchone()[0]
 
     cursor.execute("""
-            SELECT COUNT(*) FROM AULA
-            WHERE PROFESSOR_ID = ? AND DATA_AULA BETWEEN ? AND ?
-        """, (id_professor, inicio_semana, fim_semana))
+                   SELECT COUNT(*)
+                   FROM AULA
+                   WHERE PROFESSOR_ID = ?
+                   """, (id_professor,))
     total_semana = cursor.fetchone()[0]
+
 
     cursor.close()
 
     return render_template('professor-dashbord.html',titulo='Dashboard Professor',total_hoje=total_hoje,total_semana=total_semana)
-
 @app.route('/professoreditarconta', methods=['GET', 'POST'])
 def professoreditarconta():
     if 'id_usuario' not in session:
@@ -1529,7 +1561,8 @@ def professoreditarconta():
 
     nome, email, telefone, especialidade = dados
 
-    return render_template('professor-editar-conta.html',nome=nome, email=email, telefone=telefone, especialidade=especialidade)
+    return render_template('professor-editar-conta.html', nome=nome, email=email, telefone=telefone, especialidade=especialidade)
+
 
 @app.route('/professoraulaslista')
 def professoraulaslista():
@@ -1541,36 +1574,54 @@ def professoraulaslista():
         flash('Acesso negado. Apenas professores nessa pagina.', 'erro')
         return redirect(url_for('login'))
 
-    id_professor = session['id_usuario']  # Pega o ID do professor logado
+    id_professor = session['id_usuario']
 
     cursor = con.cursor()
-    # Seleciona apenas as aulas do professor logado
-    cursor.execute("""
-            SELECT 
-                A.ID_AULA, 
-                A.NOME, 
-                A.DESCRICAO, 
-                A.DATA_AULA, 
-                A.HORARIO, 
-                A.HORARIO_FINAL, 
-                A.CAPACIDADE, 
-                U.NOME AS PROFESSOR, 
-                A.MODALIDADE,
-                COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS
-            FROM AULA A
-            JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
-            LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-            WHERE A.PROFESSOR_ID = ?
-            GROUP BY 
-                A.ID_AULA, A.NOME, A.DESCRICAO, A.DATA_AULA, 
-                A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME, A.MODALIDADE
-            ORDER BY A.DATA_AULA, A.HORARIO
-        """, (id_professor,))
 
-    aulas = cursor.fetchall()
+    cursor.execute("""
+                   SELECT A.ID_AULA,
+                          A.NOME,
+                          A.DESCRICAO,
+                          A.DIA_SEMANA, -- Alterado
+                          A.HORARIO,
+                          A.HORARIO_FINAL,
+                          A.CAPACIDADE,
+                          U.NOME             AS PROFESSOR,
+                          A.MODALIDADE,
+                          COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS
+                   FROM AULA A
+                            JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
+                            LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+                   WHERE A.PROFESSOR_ID = ? -- Filtra apenas pelo professor logado
+                   GROUP BY A.ID_AULA, A.NOME, A.DESCRICAO, A.DIA_SEMANA, -- Alterado
+                            A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME, A.MODALIDADE
+                   ORDER BY A.DIA_SEMANA, A.HORARIO
+                   """, (id_professor,))
+
+    aulas_db = cursor.fetchall()
     cursor.close()
 
-    return render_template('professor-aulas-lista.html', aulas=aulas, titulo='Dashboard professor aulas lista')
+    aulas_segunda = []
+    aulas_terca = []
+    aulas_quarta = []
+    aulas_quinta = []
+    aulas_sexta = []
+
+    for aula in aulas_db:
+        dia = aula[3]
+
+        if dia == 1:
+            aulas_segunda.append(aula)
+        elif dia == 2:
+            aulas_terca.append(aula)
+        elif dia == 3:
+            aulas_quarta.append(aula)
+        elif dia == 4:
+            aulas_quinta.append(aula)
+        elif dia == 5:
+            aulas_sexta.append(aula)
+
+    return render_template('professor-aulas-lista.html',titulo='Dashboard professor aulas lista',aulas_segunda=aulas_segunda,aulas_terca=aulas_terca,aulas_quarta=aulas_quarta,aulas_quinta=aulas_quinta,aulas_sexta=aulas_sexta)
 @app.route('/professoravisos')
 def professoravisos():
     if 'id_usuario' not in session:
