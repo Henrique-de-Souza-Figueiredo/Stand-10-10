@@ -27,10 +27,13 @@
         {% endif %}
         {% endwith %}
 
-  <form class="formulario" method="POST" action="{{ url_for('admineditaraula', id=aula[0]) }}">
+<form class="formulario" method="POST" action="{{ url_for('admineditaraula', id=aula[0]) }}">
   <h1>Editar Aula</h1>
 
-   <select name="data_aula" id="Data" required>
+  <input type="text" name="nome" value="{{ aula[1] }}" placeholder="Nome da Aula" required>
+  <input type="text" maxlength="20" name="descricao" value="{{ aula[2] }}" placeholder="Digite a Descrição" required>
+
+  <select name="data_aula" id="Data" required>
     <option value="">Selecione o dia</option>
     <option value="1" {% if aula[3] == 1 %}selected{% endif %}>Segunda</option>
     <option value="2" {% if aula[3] == 2 %}selected{% endif %}>Terça</option>
@@ -39,18 +42,14 @@
     <option value="5" {% if aula[3] == 5 %}selected{% endif %}>Sexta</option>
   </select>
 
-  <input type="text" name="nome" value="{{ aula[1] }}" placeholder="Nome da Aula" required>
+  <input type="number" id="capacidade" name="capacidade" value="{{ aula[7] }}" placeholder="Vagas" required>
 
-  <input type="text" maxlength="20" name="descricao" value="{{ aula[2] }}" placeholder="Digite a Descrição" required>
-
-  <input type="time" name="horario" value="{{ aula[4] }}" required>
-
-  <input type="time" name="horario_final" value="{{ aula[5] }}" required>
+  <input type="time" id="horario" name="horario" value="{{ aula[4] }}" required>
+  <input type="time" id="horario_final" name="horario_final" value="{{ aula[5] }}" required>
 
   <button type="submit" class="cadastrar">Salvar Alterações</button>
   <a href="{{ url_for('adminaulaslista') }}">Cancelar</a>
 </form>
-
   </main>
 
   <footer class="alinhaitem">

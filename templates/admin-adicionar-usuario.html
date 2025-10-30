@@ -34,14 +34,14 @@
     <option value="1">Aluno</option>
     <option value="2">Professor</option>
     <option value="3">Admin</option>
-  </select>
-    <select name="especialidade" id="campo-especialidade">
-        <option value="">Selecione uma modalidade</option>
-    {% for modalidades in modalidades %}
-       <option value="{{ modalidades[1] }}">{{ modalidades[1] }}</option>
-        </option>
-    {% endfor %}
-</select>
+    </select>
+
+    <select name="especialidade" id="campo-especialidade" required>
+    <option value="">Selecione uma modalidade</option>
+    {% for modalidade in modalidades %}
+       <option value="{{ modalidade[0] }}">{{ modalidade[1] }}</option>
+       {% endfor %}
+    </select>
 
 
   <input type="text" name="nome" placeholder="Digite o Nome" required>
@@ -52,6 +52,7 @@
   <input type="password" minlength="8" maxlength="16" name="confsenha" placeholder="Confirme a Senha" required>
   <a href="{{ url_for('dashbordadmin') }}">Cancelar</a>
   <button type="submit">Cadastrar</button>
+
 </form>
     </main>
     <footer class="alinhaitem">

@@ -28,41 +28,40 @@
         {% endwith %}
 
 <form class="formulario" method="POST" action="{{ url_for('adminadicionaraula') }}">
-  <h1>Adicionar Aula</h1>
+    <h1>Adicionar Aula</h1>
 
-   <select id="professor_id" name="professor_id" required>
-    <option value="" data-especialidade="" data-capacidade="">Selecionar professor</option>
-    {% for professor in professores %}
-        <option value="{{ professor[0] }}"
-                data-especialidade="{{ professor[2] }}"
-                data-capacidade="{{ professor[3] }}">
-            {{ professor[1] }}
-        </option>
-    {% endfor %}
-</select>
+    <input type="text" name="nome" placeholder="Nome da Aula" required>
+    <input type="text" maxlength="20" name="descricao" placeholder="Digite a Descrição" required>
 
-   <select name="data_aula" id="Data" required>
-    <option value="1">Segunda</option>
-    <option value="2">Terça</option>
-    <option value="3">Quarta</option>
-    <option value="4">Quinta</option>
-    <option value="5">Sexta</option>
-  </select>
+    <select name="data_aula" id="Data" required>
+        <option value="">Selecione o dia</option>
+        <option value="1">Segunda</option>
+        <option value="2">Terça</option>
+        <option value="3">Quarta</option>
+        <option value="4">Quinta</option>
+        <option value="5">Sexta</option>
+    </select>
 
-  <input type="text" name="nome" placeholder="Nome da Aula" required>
+    <select name="id_modalidade" id="modalidade-select" required>
+        <option value="">Selecione a modalidade</option>
 
-  <input type="text" maxlength="20" name="descricao" placeholder="Digite a Descrição" required>
+        {% for modalidade in modalidades %}
+            <option value="{{ modalidade[0] }}" data-vagas="{{ modalidade[2] }}">
+                {{ modalidade[1] }} </option>
+        {% endfor %}
+    </select>
 
-  <input type="time" name="horario" placeholder="Horário de inicio" required>
+    <input type="number" name="capacidade" id="capacidade-input" placeholder="Vagas (automático)" readonly required>
 
-  <input type="time" name="horario_final" placeholder="Horário de termino" required>
+    <select name="professor_id" id="professor-select" required disabled>
+        <option value="">Selecione a modalidade primeiro</option>
+        </select>
 
-  <input type="number" id="capacidade" name="capacidade" placeholder="Vagas" readonly required>
+    <input type="time" name="horario" placeholder="Horário de inicio" required>
+    <input type="time" name="horario_final" placeholder="Horário de termino" required>
 
-  <input type="text" id="modalidade" name="modalidade" placeholder="Modalidade / Especialidade do professor" readonly required>
-
-  <button type="submit" class="cadastrar">Adicionar</button>
-  <a href="{{ url_for('adminaulaslista') }}">Cancelar</a>
+    <button type="submit" class="cadastrar">Adicionar Aula</button>
+    <a href="{{ url_for('adminaulaslista') }}">Cancelar</a>
 </form>
 
   </main>
@@ -85,7 +84,7 @@
 
     <div class="linha"></div>
   </footer>
-  <script src="../static/js/adicionaraula.js"></script>
+  <script src=""></script>
 </body>
 
 </html>

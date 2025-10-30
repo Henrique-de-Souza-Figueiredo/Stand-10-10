@@ -792,7 +792,7 @@ def adminadicionarusuario():
     cursor = con.cursor()
     cursor.execute("SELECT ID_MODALIDADE, MODA FROM MODALIDADES WHERE ATIVO = 1 ORDER BY MODA")
     modalidades = cursor.fetchall()
-    cursor.close()
+
 
     if request.method == 'POST':
         tipo = int(request.form['tipos'])
@@ -803,53 +803,38 @@ def adminadicionarusuario():
         senha = request.form['senha']
         confsenha = request.form['confsenha']
 
-
         cursor = con.cursor()
-
         try:
             cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
             if cursor.fetchone():
                 flash("Este email já está cadastrado!", 'erro')
-                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade_id, tipos=tipo)
+                return render_template('admin-adicionar-usuario.html', nome=nome, email=email, telefone=telefone,
+                                       especialidade=especialidade_id, tipos=tipo, modalidades=modalidades)
 
             if senha != confsenha:
                 flash('As senhas não conferem!', 'erro')
-                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade_id, tipos=tipo)
-
-            maiusculo = minuscula = numero = caracterEspecial = False
-            for s in senha:
-                if s.isupper():
-                    maiusculo = True
-                elif s.islower():
-                    minuscula = True
-                elif s.isdigit():
-                    numero = True
-                elif not s.isalnum():
-                    caracterEspecial = True
-
-            if not (maiusculo and minuscula and numero and caracterEspecial):
-                flash("Sua senha deve conter letra maiúscula, minúscula, número e caractere especial.", 'erro')
-                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade_id, tipos=tipo)
+                return render_template('admin-adicionar-usuario.html', nome=nome, email=email, telefone=telefone,
+                                       especialidade=especialidade_id, tipos=tipo, modalidades=modalidades)
 
             senha_hash = generate_password_hash(senha)
 
             if tipo == 2:
+
                 if not especialidade_id:
                     flash('Você deve selecionar uma especialidade para o professor.', 'erro')
-                    return render_template('admin-adicionar-usuario.html',
-                                           nome=nome,
-                                           email=email,
-                                           telefone=telefone,
-                                           especialidade=especialidade_id,
-                                           tipos=tipo,
-                                           modalidades=modalidades)
+                    return render_template('admin-adicionar-usuario.html', nome=nome, email=email, telefone=telefone,
+                                           especialidade=especialidade_id, tipos=tipo, modalidades=modalidades)
+
                 cursor.execute("""
                                INSERT INTO usuario (nome, email, telefone, ID_MODALIDADE, senha, tipo, tentativas)
                                VALUES (?, ?, ?, ?, ?, ?, 0)
                                """, (nome, email, telefone, especialidade_id, senha_hash, tipo))
             else:
-                cursor.execute("INSERT INTO usuario (nome, email, telefone, senha, tipo, tentativas)VALUES (?, ?, ?, ?, ?, 0)",
-                               (nome, email, telefone, senha_hash, tipo))
+
+                cursor.execute("""
+                    INSERT INTO usuario (nome, email, telefone, ID_MODALIDADE, senha, tipo, tentativas)
+                    VALUES (?, ?, ?, ?, ?, ?, 0)
+                    """, (nome, email, telefone, None, senha_hash, tipo))
 
             con.commit()
             flash('Usuário cadastrado com sucesso!', 'success')
@@ -858,10 +843,10 @@ def adminadicionarusuario():
         finally:
             cursor.close()
 
+    cursor.close()
     return render_template('admin-adicionar-usuario.html', modalidades=modalidades)
 
-
-@app.route('/adminmodalidadeslista')
+@app.route('/adminmodalidadeslista', methods=['GET', 'POST'])
 def adminmodalidadeslista():
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
@@ -904,7 +889,8 @@ def adminmodalidadeslista():
 
     return render_template('admin-modalidades-lista.html', modali=modali, titulo='Dashboard admin lista aulas')
 
-@app.route('/adminadicionarmodalidades', methods=['POST','GET'])
+
+@app.route('/adminadicionarmodalidades', methods=['POST', 'GET'])
 def adminadicionarmodalidades():
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
@@ -918,26 +904,33 @@ def adminadicionarmodalidades():
         moda = request.form['moda']
         vagas = request.form['vagas']
 
+        if not moda or not vagas:
+            flash('Nome da modalidade e vagas são obrigatórios.', 'erro')
+            return render_template('admin-adicionar-modalidades.html', titulo='Adicionar modalidade')
+
         cursor = con.cursor()
 
+        cursor.execute("SELECT 1 FROM MODALIDADES WHERE UPPER(MODA) = UPPER(?)", (moda,))
 
-        cursor.execute("SELECT 1 FROM MODALIDADES WHERE MODA = ?", (moda,))
         conflito_moda = cursor.fetchone()
 
         if conflito_moda:
-            flash('Ja existe essa modalidade', 'erro')
+            flash('Já existe essa modalidade (mesmo com letras maiúsculas/minúsculas diferentes).', 'erro')
             cursor.close()
-            return redirect(url_for('adminadicionarmodalidades'))
 
-        cursor = con.cursor()
-        cursor.execute("INSERT INTO modalidades (moda, vagas) VALUES (?, ?)", (moda, vagas))
+            return render_template('admin-adicionar-modalidades.html', titulo='Adicionar modalidade', moda=moda,vagas=vagas)
+
+        moda_padronizada = moda.title()
+
+        cursor.execute("INSERT INTO modalidades (moda, vagas) VALUES (?, ?)", (moda_padronizada, vagas))
+
         con.commit()
         cursor.close()
-        flash('Modalidade adicionado com sucesso!', 'success')
+        flash('Modalidade adicionada com sucesso!', 'success')
         return redirect(url_for('adminmodalidadeslista'))
 
+    # Se for GET, apenas renderiza a página
     return render_template('admin-adicionar-modalidades.html', titulo='Adicionar modalidade')
-
 
 @app.route('/adminexcluirmodalidades/<int:id>', methods=['GET', 'POST'])
 def adminexcluirmodalidades(id):
@@ -998,6 +991,7 @@ def adminexcluirmodalidades(id):
     flash("Modalidade excluída com sucesso!", "success")
     return redirect(url_for('adminmodalidadeslista'))
 
+
 @app.route('/admineditarmodalidades/<int:id>', methods=['GET', 'POST'])
 def admineditarmodalidades(id):
     if 'id_usuario' not in session:
@@ -1007,7 +1001,33 @@ def admineditarmodalidades(id):
     if session.get('tipo') != 3:
         flash('Acesso negado. Somente administradores nessa pagina', 'erro')
         return redirect(url_for('login'))
+
     cursor = con.cursor()
+
+    if request.method == 'POST':
+
+        moda_nova = request.form['moda']
+        vagas_novo = request.form['vagas']
+
+        cursor.execute("SELECT 1 FROM MODALIDADES WHERE UPPER(MODA) = UPPER(?) AND ID_MODALIDADE != ?", (moda_nova, id))
+        conflito_moda = cursor.fetchone()
+
+        if conflito_moda:
+            flash('Já existe outra modalidade com esse nome.', 'erro')
+            cursor.close()
+
+            return render_template('admin-editar-modalidades.html',moda_atual=moda_nova,  vagas_atual=vagas_novo, id=id,titulo='Editar Modalidade')
+
+        moda_padronizada = moda_nova.title()
+
+        cursor.execute("UPDATE modalidades SET moda = ?, vagas = ? WHERE ID_MODALIDADE = ?",
+                       (moda_padronizada, vagas_novo, id))
+
+        con.commit()
+        cursor.close()
+
+        flash('Modalidade atualizada com sucesso!', 'success')
+        return redirect(url_for('adminmodalidadeslista'))
 
     cursor.execute("SELECT moda, vagas FROM modalidades WHERE id_modalidade = ?", (id,))
     modalidade = cursor.fetchone()
@@ -1018,22 +1038,9 @@ def admineditarmodalidades(id):
         return redirect(url_for('adminmodalidadeslista'))
 
     moda_atual, vagas_atual = modalidade
-
-    if request.method == 'POST':
-        moda = request.form['moda']
-        vagas = request.form['vagas']
-
-        cursor.execute("UPDATE modalidades SET moda = ?, vagas = ? WHERE id_modalidades = ?",
-                       (moda, vagas, id))
-        con.commit()
-        cursor.close()
-
-        flash('Aviso atualizado com sucesso!', 'success')
-        return redirect(url_for('adminmodalidadeslista'))
-
     cursor.close()
-    return render_template('admin-editar-modalidades.html', moda_atual=moda_atual, vagas_atual=vagas_atual, id=id)
 
+    return render_template('admin-editar-modalidades.html',moda_atual=moda_atual,vagas_atual=vagas_atual,id=id,titulo='Editar Modalidade')
 
 @app.route('/adminaulaslista')
 def adminaulaslista():
@@ -1048,40 +1055,36 @@ def adminaulaslista():
     cursor = con.cursor()
 
     cursor.execute("""SELECT 
-               A.ID_AULA, 
-               A.NOME, 
-               A.DESCRICAO, 
-               A.DIA_SEMANA,  -- Alterado
-               A.HORARIO, 
-               A.HORARIO_FINAL, 
-               A.CAPACIDADE, 
-               U.NOME AS PROFESSOR, 
-               A.MODALIDADE,
-               COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS
-           FROM AULA A
-           JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
-           LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-           GROUP BY 
-               A.ID_AULA, A.NOME, A.DESCRICAO, A.DIA_SEMANA,  -- Alterado
-               A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME, A.MODALIDADE
-           ORDER BY A.DIA_SEMANA, A.HORARIO
-       """)
-    # Pega todas as aulas do banco
+                   A.ID_AULA,
+                   A.NOME,
+                   A.DESCRICAO,
+                   A.DIA_SEMANA,
+                   A.HORARIO,
+                   A.HORARIO_FINAL,
+                   A.CAPACIDADE,   
+                   U.NOME AS PROFESSOR,
+                   M.MODA,
+                   COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS 
+               FROM AULA A
+               JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
+               JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE 
+               LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+               GROUP BY 
+                   A.ID_AULA, A.NOME, A.DESCRICAO, A.DIA_SEMANA,
+                   A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME,
+                   M.MODA
+               ORDER BY A.DIA_SEMANA, A.HORARIO
+           """)
     aulas_db = cursor.fetchall()
     cursor.close()
 
-    # --- INÍCIO DA MODIFICAÇÃO 2: Processar e separar as aulas ---
-
-    # 1. Criar as listas vazias
     aulas_segunda = []
     aulas_terca = []
     aulas_quarta = []
     aulas_quinta = []
     aulas_sexta = []
 
-    # 2. Distribuir as aulas nas listas corretas
     for aula in aulas_db:
-        # O DIA_SEMANA é o 4º item (índice 3) da nossa consulta SQL
         dia = aula[3]
 
         if dia == 1:
@@ -1094,19 +1097,8 @@ def adminaulaslista():
             aulas_quinta.append(aula)
         elif dia == 5:
             aulas_sexta.append(aula)
-        # Aulas com dia 0 (Domingo) ou 6 (Sábado) serão ignoradas,
-        # pois o seu HTML só lista de Segunda a Sexta.
 
-    # --- INÍCIO DA MODIFICAÇÃO 3: Renderizar com as novas listas ---
-    return render_template(
-        'admin-aulas-listas.html',
-        titulo='Dashboard admin lista aulas',
-        aulas_segunda=aulas_segunda,
-        aulas_terca=aulas_terca,
-        aulas_quarta=aulas_quarta,
-        aulas_quinta=aulas_quinta,
-        aulas_sexta=aulas_sexta
-    )
+    return render_template('admin-aulas-listas.html',titulo='Dashboard admin lista aulas',aulas_segunda=aulas_segunda,aulas_terca=aulas_terca,aulas_quarta=aulas_quarta,aulas_quinta=aulas_quinta,aulas_sexta=aulas_sexta)
 
 
 @app.route('/adminadicionaraula', methods=['GET', 'POST'])
@@ -1121,28 +1113,42 @@ def adminadicionaraula():
 
     cursor = con.cursor()
 
-    cursor.execute("""
-        SELECT 
-            U.ID_USUARIO, 
-            U.NOME, 
-            U.ESPECIALIDADE,
-            M.VAGAS  
-        FROM USUARIO AS U
-        LEFT JOIN MODALIDADES AS M ON U.ESPECIALIDADE = M.MODA
-        WHERE U.TIPO = 2
-    """)
-    professores = cursor.fetchall()
-
     if request.method == 'POST':
+
         nome = request.form['nome']
         descricao = request.form.get('descricao')
-
         dia_semana = request.form['data_aula']
-
         horario = request.form['horario']
         horario_final = request.form['horario_final']
         capacidade = request.form.get('capacidade')
+        id_da_modalidade = request.form['id_modalidade']
         professor_id = request.form['professor_id']
+
+        horario_minimo = "07:00"
+        horario_maximo = "22:00"
+
+        if horario_final <= horario:
+            flash('O horário de término deve ser maior que o horário de início!', 'erro')
+            cursor.close()
+            return redirect(url_for('adminadicionaraula'))
+
+        if horario < horario_minimo or horario > horario_maximo:
+            flash(f'O horário de início deve estar entre {horario_minimo} e {horario_maximo}!', 'erro')
+            cursor.close()
+            return redirect(url_for('adminadicionaraula'))
+
+        if horario_final < horario_minimo or horario_final > horario_maximo:
+            flash(f'O horário de término deve estar entre {horario_minimo} e {horario_maximo}!', 'erro')
+            cursor.close()
+            return redirect(url_for('adminadicionaraula'))
+
+        cursor.execute("SELECT 1 FROM AULA WHERE NOME = ?", (nome,))
+        conflito_nome = cursor.fetchone()
+
+        if conflito_nome:
+            flash('Ja existe uma aula com esse nome', 'erro')
+            cursor.close()
+            return redirect(url_for('adminadicionaraula'))
 
         cursor.execute("""
                     SELECT 1 FROM AULA 
@@ -1153,38 +1159,48 @@ def adminadicionaraula():
                 """, (professor_id, dia_semana, horario_final, horario))
         conflito = cursor.fetchone()
 
-        cursor.execute("SELECT 1 FROM AULA WHERE NOME = ?", (nome,))
-        conflito_nome = cursor.fetchone()
-
-        if conflito_nome:
-            flash('Ja existe uma aula com esse nome', 'erro')
-            cursor.close()
-            return redirect(url_for('adminadicionaraula'))
-
         if conflito:
             flash('O professor já possui uma aula nesse dia e horário!', 'erro')
             cursor.close()
             return redirect(url_for('adminadicionaraula'))
 
-        # Pega a modalidade do professor
-        cursor.execute("SELECT ESPECIALIDADE FROM USUARIO WHERE ID_USUARIO = ?", (professor_id,))
-        resultado = cursor.fetchone()
-        modalidade = resultado[0] if resultado else ''
-
-        # 4. Inserir no banco com DIA_SEMANA
         cursor.execute("""
             INSERT INTO AULA 
-                (NOME, DESCRICAO, DIA_SEMANA, HORARIO, HORARIO_FINAL, CAPACIDADE, PROFESSOR_ID, MODALIDADE) 
+                (NOME, DESCRICAO, DIA_SEMANA, HORARIO, HORARIO_FINAL, CAPACIDADE, PROFESSOR_ID, ID_MODALIDADE) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,(nome, descricao, dia_semana, horario, horario_final, capacidade, professor_id, modalidade))
+            """, (nome, descricao, dia_semana, horario, horario_final, capacidade, professor_id, id_da_modalidade))
 
         con.commit()
         cursor.close()
         flash('Aula adicionada com sucesso!', 'success')
         return redirect(url_for('adminaulaslista'))
 
+    cursor.execute("""
+        SELECT ID_MODALIDADE, MODA, VAGAS 
+        FROM MODALIDADES 
+        WHERE ATIVO = 1 
+        ORDER BY MODA
+    """)
+    modalidades_lista = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT 
+            U.ID_USUARIO,
+            U.NOME,
+            U.ID_MODALIDADE 
+        FROM USUARIO AS U
+        JOIN MODALIDADES AS M ON U.ID_MODALIDADE = M.ID_MODALIDADE
+        WHERE U.TIPO = 2
+          AND M.ATIVO = 1
+        ORDER BY U.NOME
+    """)
+    professores_lista = cursor.fetchall()
+
     cursor.close()
-    return render_template('admin-adicionar-aula.html', professores=professores,
+
+    return render_template('admin-adicionar-aula.html',
+                           modalidades=modalidades_lista,
+                           professores=professores_lista,
                            titulo='Dashboard admin adicionar aula')
 
 @app.route('/adminalunosmatriculados/<int:aula_id>')
@@ -1224,11 +1240,8 @@ def admineditaraula(id):
 
     cursor = con.cursor()
 
-    cursor.execute("SELECT ID_USUARIO, NOME, ESPECIALIDADE FROM USUARIO WHERE TIPO = 2")
-    professores = cursor.fetchall()
-
     cursor.execute("""
-        SELECT ID_AULA, NOME, DESCRICAO, DIA_SEMANA, HORARIO, HORARIO_FINAL, PROFESSOR_ID 
+        SELECT ID_AULA, NOME, DESCRICAO, DIA_SEMANA, HORARIO, HORARIO_FINAL, PROFESSOR_ID, CAPACIDADE 
         FROM AULA WHERE ID_AULA = ?
     """, (id,))
     aula = cursor.fetchone()
@@ -1243,11 +1256,28 @@ def admineditaraula(id):
     if request.method == 'POST':
         nome = request.form['nome']
         descricao = request.form['descricao']
-
         dia_semana = request.form['data_aula']
-
         horario = request.form['horario']
         horario_final = request.form['horario_final']
+        capacidade = request.form.get('capacidade')
+
+        horario_minimo = "07:00"
+        horario_maximo = "22:00"
+
+        if horario_final <= horario:
+            flash('O horário de término deve ser maior que o horário de início!', 'erro')
+            cursor.close()
+            return redirect(url_for('admineditaraula', id=id))
+
+        if horario < horario_minimo or horario > horario_maximo:
+            flash(f'O horário de início deve estar entre {horario_minimo} e {horario_maximo}!', 'erro')
+            cursor.close()
+            return redirect(url_for('admineditaraula', id=id))
+
+        if horario_final < horario_minimo or horario_final > horario_maximo:
+            flash(f'O horário de término deve estar entre {horario_minimo} e {horario_maximo}!', 'erro')
+            cursor.close()
+            return redirect(url_for('admineditaraula', id=id))
 
         cursor.execute("SELECT 1 FROM AULA WHERE NOME = ? AND ID_AULA != ?", (nome, id))
         conflito_nome = cursor.fetchone()
@@ -1270,23 +1300,21 @@ def admineditaraula(id):
         if conflito_horario:
             flash('Este professor já possui outra aula que conflita com este novo dia/horário!', 'erro')
             cursor.close()
-
             return redirect(url_for('admineditaraula', id=id))
 
         cursor.execute("""
             UPDATE AULA 
-            SET NOME = ?, DESCRICAO = ?, DIA_SEMANA = ?, HORARIO = ?, HORARIO_FINAL = ? 
+            SET NOME = ?, DESCRICAO = ?, DIA_SEMANA = ?, HORARIO = ?, HORARIO_FINAL = ?, CAPACIDADE = ?
             WHERE ID_AULA = ?
-        """, (nome, descricao, dia_semana, horario, horario_final, id))
+        """, (nome, descricao, dia_semana, horario, horario_final, capacidade, id))
 
         con.commit()
         cursor.close()
-
         flash('Aula atualizada com sucesso!', 'success')
         return redirect(url_for('adminaulaslista'))
 
     cursor.close()
-    return render_template('admin-editar-aula.html', aula=aula, professores=professores, titulo='Editar Aula')
+    return render_template('admin-editar-aula.html', aula=aula, titulo='Editar Aula')
 
 @app.route('/adminexcluiraula/<int:aula_id>', methods=['GET', 'POST'])
 def adminexcluiraula(aula_id):
@@ -1757,27 +1785,30 @@ def cadastrar():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'id_usuario' in session:
-        flash('Você precisa deslogar primeiro.', 'erro')
-        if session.get('alunodashbord') == 1:
-            return redirect('')
-        elif session.get('tipo') == 2:
-            return redirect('professordashbord')
-        else:
-            return redirect('dashbordadmin')
+        flash('Você já está logado.', 'info')  # Mudei de 'erro' para 'info'
 
+        if session.get('tipo') == 1:
+            return redirect(url_for('alunodashbord'))
+        elif session.get('tipo') == 2:
+            return redirect(url_for('professordashbord'))
+        else:
+            return redirect(url_for('dashbordadmin'))
 
     if request.method == 'POST':
         email = request.form['email']
         senha = request.form['senha']
 
         cursor = con.cursor()
+
         cursor.execute(
-            "SELECT id_usuario, nome, email, telefone, senha, especialidade, tipo, tentativas FROM usuario WHERE email = ?",
+            "SELECT id_usuario, nome, email, telefone, senha, ID_MODALIDADE, tipo, tentativas FROM usuario WHERE email = ?",
             (email,))
+
         usuario = cursor.fetchone()
         cursor.close()
 
         if usuario:
+
             tentativas = usuario[7]
 
             if tentativas >= 3:
@@ -1804,7 +1835,6 @@ def login():
                 else:
                     return redirect(url_for('dashbordadmin'))
             else:
-
                 tentativas += 1
                 cursor = con.cursor()
                 cursor.execute("UPDATE usuario SET tentativas = ? WHERE email = ?", (tentativas, email))
@@ -1818,7 +1848,6 @@ def login():
             return redirect(url_for('login'))
 
     return render_template('login.html', titulo='Login')
-
 
 
 if __name__ == '__main__':

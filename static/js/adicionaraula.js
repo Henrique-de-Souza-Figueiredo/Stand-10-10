@@ -1,63 +1,43 @@
-// Selecionar elementos (Adicionar o capacidadeInput)
-const form = document.querySelector('.formulario');
-const professorSelect = document.getElementById('professor_id');
-const modalidadeInput = document.getElementById('modalidade');
-const capacidadeInput = document.getElementById('capacidade'); // <-- ADICIONAR ESTA LINHA
-const dataInput = document.querySelector('input[name="data_aula"]');
-const horarioInicio = document.querySelector('input[name="horario"]');
-const horarioFinal = document.querySelector('input[name="horario_final"]');
 
-// Atualiza automaticamente os campos "modalidade" E "capacidade"
-professorSelect.addEventListener('change', () => {
-  const selectedOption = professorSelect.options[professorSelect.selectedIndex];
+    var allProfessores = {{ professores|tojson }};
 
-  // Atualiza modalidade
-  modalidadeInput.value = selectedOption.dataset.especialidade || '';
+    var modalidadeSelect = document.getElementById('modalidade-select');
+    var professorSelect = document.getElementById('professor-select');
+    var capacidadeInput = document.getElementById('capacidade-input');
 
-  // ATUALIZAR: Adiciona a lógica para capacidade
-  capacidadeInput.value = selectedOption.dataset.capacidade || '';
-});
+    modalidadeSelect.addEventListener('change', function() {
 
-// Validação antes de enviar o formulário (SEU CÓDIGO ORIGINAL, ESTÁ CORRETO)
-form.addEventListener('submit', (event) => {
-  const hoje = new Date();
-  const dataSelecionada = new Date(dataInput.value + "T00:00");
-  const horarioInicioValor = horarioInicio.value;
-  const horarioFinalValor = horarioFinal.value;
+        var selectedModalidadeId = this.value;
 
+        var selectedOption = this.options[this.selectedIndex];
 
-  if (professorSelect.value === "") {
-    alert("Por favor, selecione um professor antes de continuar!");
-    event.preventDefault();
-    return;
-  }
+        professorSelect.innerHTML = '';
 
-  const hojeSemHora = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-  if (dataSelecionada < hojeSemHora) {
-    alert("A data da aula não pode ser no passado!");
-    event.preventDefault();
-    return;
-  }
+        if (selectedModalidadeId) {
 
-  if (horarioFinalValor <= horarioInicioValor) {
-    alert("O horário de término deve ser maior que o horário de início!");
-    event.preventDefault();
-    return;
-  }
+            capacidadeInput.value = selectedOption.getAttribute('data-vagas');
+            capacidadeInput.readOnly = true;
 
-  const horarioMin = "07:00";
-  const horarioMax = "22:00";
+            professorSelect.disabled = false;
+            professorSelect.add(new Option('Selecione um professor', ''));
 
-  if (horarioInicioValor < horarioMin || horarioInicioValor > horarioMax) {
-    alert("O horário de início deve estar entre 07:00 e 22:00!");
-    event.preventDefault();
-    return;
-  }
+            allProfessores.forEach(function(professor) {
 
-  if (horarioFinalValor < horarioMin || horarioFinalValor > horarioMax) {
-    alert("O horário de término deve estar entre 07:00 e 22:00!");
-    event.preventDefault();
-    return;
-  }
+                if (professor[2] == selectedModalidadeId) {
 
-});
+                    var option = new Option(professor[1], professor[0]);
+                    professorSelect.add(option);
+                }
+            });
+            
+        } else {
+
+            capacidadeInput.value = '';
+            capacidadeInput.placeholder = 'Vagas (automático)';
+            capacidadeInput.readOnly = true;
+
+            professorSelect.disabled = true;
+            professorSelect.add(new Option('Selecione a modalidade primeiro', ''));
+        }
+    });
+</script>
