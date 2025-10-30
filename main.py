@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'senhastandsi,teacademia'
 
 host = 'localhost'
-database = r'C:\Users\Aluno\Desktop\Stand-10-10\BANCO.FDB'
+database = r'C:\Users\WIN11\Desktop\Stand-10-10\BANCO.FDB'
 user = 'sysdba'
 password = 'sysdba'
 
