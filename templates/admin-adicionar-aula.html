@@ -30,7 +30,7 @@
 <form class="formulario" method="POST" action="{{ url_for('adminadicionaraula') }}">
   <h1>Adicionar Aula</h1>
 
-   <select id="professor_id" name="professor_id">
+   <select id="professor_id" name="professor_id" required>
     <option value="" data-especialidade="" data-capacidade="">Selecionar professor</option>
     {% for professor in professores %}
         <option value="{{ professor[0] }}"
