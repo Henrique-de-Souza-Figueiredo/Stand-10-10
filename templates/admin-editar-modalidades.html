@@ -31,7 +31,7 @@
   <h1>Editar Modalidade</h1>
 
   <input type="text" name="moda" placeholder="Digite a modalidade" value="{{ moda_atual }}" required>
-  <input type="number" min="5" max="50" name="vagas" placeholder="Numero de vagas" value="{{ vagas_atual }}" required>
+  <input type="number" min="1" name="vagas" placeholder="Numero de vagas" value="{{ vagas_atual }}" required>
 
   <a href="{{ url_for('adminmodalidadeslista') }}" >Cancelar</a>
   <button type="submit" class="btn adicionar">Salvar Alterações</button>
