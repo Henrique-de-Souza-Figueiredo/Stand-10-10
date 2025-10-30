@@ -99,6 +99,17 @@
                 <p><strong>Vagas:</strong> {{ modalidade[2] }}</p>
                 <div class="item-texto">
                 <div class="item-actions">
+                    <form action="{{ url_for('adminmodalidadeslista') }}" method="POST" style="display:inline;">
+                <input type="hidden" name="id_modalidade" value="{{ modalidade[0] }}">
+
+                {% if modalidade[3] == 1 %}
+                    <input type="hidden" name="acao" value="desativar">
+                    <button type="submit" class="btn btn-deletar">Desativar</button>
+                {% else %}
+                    <input type="hidden" name="acao" value="ativar">
+                    <button type="submit" class="btn btn-ver">Ativar</button>
+                {% endif %}
+            </form>
                      <a href="{{ url_for('admineditarmodalidades', id=modalidade[0]) }}" class="btn btn-editar">Editar</a>
                 <a href="{{ url_for('adminexcluirmodalidades', id=modalidade[0]) }}" class="btn btn-deletar">Excluir</a>
                 </div>

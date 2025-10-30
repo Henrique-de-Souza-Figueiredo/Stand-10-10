@@ -486,7 +486,17 @@ def adminprofessoreslista():
         return redirect(url_for('login'))
 
     cursor = con.cursor()
-    cursor.execute("select id_usuario, nome, email, especialidade, tentativas  from USUARIO WHERE tipo = 2")
+    cursor.execute("""
+                   SELECT U.ID_USUARIO,
+                          U.NOME,
+                          U.EMAIL,
+                          M.MODA, -- Esta é a nova "especialidade" (o nome vindo da tabela MODALIDADES)
+                          U.TENTATIVAS
+                   FROM USUARIO AS U
+                            LEFT JOIN MODALIDADES AS M ON U.ID_MODALIDADE = M.ID_MODALIDADE
+                   WHERE U.TIPO = 2
+                   ORDER BY U.NOME
+                   """)
     profli = cursor.fetchall()
     cursor.close()
     return render_template('admin-professores-lista.html', profli=profli, titulo='Dashboard admin lista professores')
@@ -504,9 +514,6 @@ def admineditarprofessor(id):
 
     cursor = con.cursor()
 
-    # --- INÍCIO DA MODIFICAÇÃO ---
-    # 1. Verificar se o professor tem aulas cadastradas ANTES de fazer qualquer coisa
-    #    (Assumindo que a FK na tabela AULA é 'PROFESSOR_ID')
     cursor.execute("SELECT 1 FROM AULA WHERE PROFESSOR_ID = ?", (id,))
     aula_existente = cursor.fetchone()
 
@@ -516,7 +523,7 @@ def admineditarprofessor(id):
 
         return redirect(url_for('adminprofessoreslista'))
 
-    cursor.execute("SELECT id_modalidade, moda FROM modalidades ORDER BY moda")
+    cursor.execute("SELECT id_modalidade, moda FROM modalidades WHERE ATIVO = 1 ORDER BY moda")
     modalidades_lista = cursor.fetchall()
 
     if request.method == 'POST':
@@ -524,7 +531,7 @@ def admineditarprofessor(id):
         nome = request.form['nome']
         email = request.form['email']
         telefone = request.form['telefone']
-        especialidade = request.form['especialidade']
+        especialidade_id = request.form['especialidade']
         senha = request.form['senha']
         confsenha = request.form['confsenha']
 
@@ -533,7 +540,7 @@ def admineditarprofessor(id):
             return render_template("admin-editar-professor.html",
                                    id=id, modalidades=modalidades_lista,
                                    nome=nome, email=email, telefone=telefone,
-                                   especialidade=especialidade)
+                                   especialidade=especialidade_id)
 
         cursor.execute('SELECT 1 FROM usuario WHERE email = ? AND id_usuario != ?', (email, id))
         if cursor.fetchone():
@@ -541,7 +548,7 @@ def admineditarprofessor(id):
             return render_template("admin-editar-professor.html",
                                    id=id, modalidades=modalidades_lista,
                                    nome=nome, email=email, telefone=telefone,
-                                   especialidade=especialidade)
+                                   especialidade=especialidade_id)
 
         if senha:
             maiusculo = minuscula = numero = caracterEspecial = False
@@ -560,21 +567,21 @@ def admineditarprofessor(id):
                 return render_template("admin-editar-professor.html",
                                        id=id, modalidades=modalidades_lista,
                                        nome=nome, email=email, telefone=telefone,
-                                       especialidade=especialidade)
+                                       especialidade=especialidade_id)
 
             senha_hash = generate_password_hash(senha)
             cursor.execute("""
-                UPDATE usuario 
-                SET nome = ?, email = ?, telefone = ?, especialidade = ?, senha = ? 
-                WHERE id_usuario = ?
-            """, (nome, email, telefone, especialidade, senha_hash, id))
+                           UPDATE usuario
+                           SET nome = ?, email = ?, telefone = ?, ID_MODALIDADE = ?, senha = ?
+                           WHERE id_usuario = ?
+                           """, (nome, email, telefone, especialidade_id, senha_hash, id))
 
         else:
             cursor.execute("""
                 UPDATE usuario 
-                SET nome = ?, email = ?, telefone = ?, especialidade = ? 
+                SET nome = ?, email = ?, telefone = ?, ID_MODALIDADE = ? 
                 WHERE id_usuario = ?
-            """, (nome, email, telefone, especialidade, id))
+            """, (nome, email, telefone, especialidade_id, id))
 
         con.commit()
         cursor.close()
@@ -582,7 +589,7 @@ def admineditarprofessor(id):
         return redirect(url_for('adminprofessoreslista'))
 
     else:
-        cursor.execute("SELECT nome, email, telefone, especialidade FROM usuario WHERE id_usuario = ?", (id,))
+        cursor.execute("SELECT nome, email, telefone, ID_MODALIDADE FROM usuario WHERE id_usuario = ?", (id,))
         professor = cursor.fetchone()
 
         if not professor:
@@ -590,11 +597,11 @@ def admineditarprofessor(id):
             flash("Professor não foi encontrado.", 'erro')
             return redirect(url_for('adminprofessoreslista'))
 
-        nome_atual, email_atual, telefone_atual, especialidade_atual = professor
+        nome_atual, email_atual, telefone_atual, especialidade_atual_id = professor
         cursor.close()
 
         return render_template(
-            'admin-editar-professor.html',id=id,modalidades=modalidades_lista,nome=nome_atual,email=email_atual,telefone=telefone_atual,especialidade=especialidade_atual)
+            'admin-editar-professor.html',id=id,modalidades=modalidades_lista,nome=nome_atual,email=email_atual,telefone=telefone_atual,especialidade=especialidade_atual_id)
 
 @app.route('/adminexcluirprofessor/<int:id>', methods=['GET', 'POST'])
 def adminexcluirprofessor(id):
@@ -783,7 +790,7 @@ def adminadicionarusuario():
         return redirect(url_for('login'))
 
     cursor = con.cursor()
-    cursor.execute("SELECT ID_MODALIDADE, MODA FROM MODALIDADES")
+    cursor.execute("SELECT ID_MODALIDADE, MODA FROM MODALIDADES WHERE ATIVO = 1 ORDER BY MODA")
     modalidades = cursor.fetchall()
     cursor.close()
 
@@ -792,9 +799,10 @@ def adminadicionarusuario():
         nome = request.form['nome']
         email = request.form['email']
         telefone = request.form['telefone']
-        especialidade = request.form.get('especialidade', '')
+        especialidade_id = request.form.get('especialidade')
         senha = request.form['senha']
         confsenha = request.form['confsenha']
+
 
         cursor = con.cursor()
 
@@ -802,11 +810,11 @@ def adminadicionarusuario():
             cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
             if cursor.fetchone():
                 flash("Este email já está cadastrado!", 'erro')
-                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade, tipos=tipo)
+                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade_id, tipos=tipo)
 
             if senha != confsenha:
                 flash('As senhas não conferem!', 'erro')
-                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade, tipos=tipo)
+                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade_id, tipos=tipo)
 
             maiusculo = minuscula = numero = caracterEspecial = False
             for s in senha:
@@ -821,13 +829,24 @@ def adminadicionarusuario():
 
             if not (maiusculo and minuscula and numero and caracterEspecial):
                 flash("Sua senha deve conter letra maiúscula, minúscula, número e caractere especial.", 'erro')
-                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade, tipos=tipo)
+                return render_template('admin-adicionar-usuario.html',nome=nome, email=email, telefone=telefone,especialidade=especialidade_id, tipos=tipo)
 
             senha_hash = generate_password_hash(senha)
 
             if tipo == 2:
-                cursor.execute("INSERT INTO usuario (nome, email, telefone, especialidade, senha, tipo, tentativas) VALUES (?, ?, ?, ?, ?, ?, 0)",
-                               (nome, email, telefone, especialidade, senha_hash, tipo))
+                if not especialidade_id:
+                    flash('Você deve selecionar uma especialidade para o professor.', 'erro')
+                    return render_template('admin-adicionar-usuario.html',
+                                           nome=nome,
+                                           email=email,
+                                           telefone=telefone,
+                                           especialidade=especialidade_id,
+                                           tipos=tipo,
+                                           modalidades=modalidades)
+                cursor.execute("""
+                               INSERT INTO usuario (nome, email, telefone, ID_MODALIDADE, senha, tipo, tentativas)
+                               VALUES (?, ?, ?, ?, ?, ?, 0)
+                               """, (nome, email, telefone, especialidade_id, senha_hash, tipo))
             else:
                 cursor.execute("INSERT INTO usuario (nome, email, telefone, senha, tipo, tentativas)VALUES (?, ?, ?, ?, ?, 0)",
                                (nome, email, telefone, senha_hash, tipo))
@@ -853,7 +872,33 @@ def adminmodalidadeslista():
         return redirect(url_for('login'))
 
     cursor = con.cursor()
-    cursor.execute("SELECT ID_MODALIDADE, MODA, VAGAS FROM MODALIDADES")
+
+    if request.method == 'POST':
+        id_modalidade = request.form['id_modalidade']
+        acao = request.form['acao']
+
+        if acao == 'desativar':
+            cursor.execute("SELECT 1 FROM AULA WHERE ID_MODALIDADE = ?", (id_modalidade,))
+            aula_existente = cursor.fetchone()
+
+            if aula_existente:
+                flash(
+                    'Não é possível desativar esta modalidade, pois ela já está sendo usada por aulas cadastradas. Exclua as aulas primeiro.',
+                    'erro')
+            else:
+                cursor.execute("UPDATE MODALIDADES SET ATIVO = 0 WHERE ID_MODALIDADE = ?", (id_modalidade,))
+                con.commit()
+                flash('Modalidade desativada com sucesso.', 'success')
+
+        elif acao == 'ativar':
+            cursor.execute("UPDATE MODALIDADES SET ATIVO = 1 WHERE ID_MODALIDADE = ?", (id_modalidade,))
+            con.commit()
+            flash('Modalidade ativada com sucesso.', 'success')
+
+        cursor.close()
+        return redirect(url_for('adminmodalidadeslista'))
+
+    cursor.execute("SELECT ID_MODALIDADE, MODA, VAGAS, ATIVO FROM MODALIDADES")
     modali = cursor.fetchall()
     cursor.close()
 
@@ -874,6 +919,7 @@ def adminadicionarmodalidades():
         vagas = request.form['vagas']
 
         cursor = con.cursor()
+
 
         cursor.execute("SELECT 1 FROM MODALIDADES WHERE MODA = ?", (moda,))
         conflito_moda = cursor.fetchone()
@@ -926,7 +972,7 @@ def adminexcluirmodalidades(id):
 
     nome_da_modalidade = modalidade_record[0]
 
-    cursor.execute("SELECT 1 FROM AULA WHERE MODALIDADE = ?", (nome_da_modalidade,))
+    cursor.execute("SELECT 1 FROM AULA WHERE ID_MODALIDADE = ?", (id,))
     aula_existente = cursor.fetchone()
 
     if aula_existente:
@@ -935,7 +981,7 @@ def adminexcluirmodalidades(id):
         cursor.close()
         return redirect(url_for('adminmodalidadeslista'))
 
-    cursor.execute("SELECT 1 FROM USUARIO WHERE ESPECIALIDADE = ? AND TIPO = 2", (nome_da_modalidade,))
+    cursor.execute("SELECT 1 FROM USUARIO WHERE ID_MODALIDADE = ? AND TIPO = 2", (id,))
     professor_existente = cursor.fetchone()
 
     if professor_existente:
