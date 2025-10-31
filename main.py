@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'senhastandsi,teacademia'
 
 host = 'localhost'
-database = r'C:\Users\WIN11\Desktop\Stand-10-10\BANCO.FDB'
+database = r'C:\Users\Aluno\Desktop\Stand-10-10\BANCO.FDB'
 user = 'sysdba'
 password = 'sysdba'
 
@@ -102,6 +102,8 @@ def alunodashbord():
     cursor.close()
 
     return render_template('aluno-dashbord.html',titulo='Dashboard Aluno',aulas_disponiveis_hoje=aulas_disponiveis_hoje,aulas_disponiveis_semana=aulas_disponiveis_semana,aulas_inscritas_hoje=aulas_inscritas_hoje,aulas_inscritas_semana=aulas_inscritas_semana)
+
+
 @app.route('/alunoprofessoreslista')
 def alunoprofessoreslista():
     if 'id_usuario' not in session:
@@ -113,10 +115,24 @@ def alunoprofessoreslista():
         return redirect(url_for('login'))
 
     cursor = con.cursor()
-    cursor.execute("select id_usuario, nome, email, especialidade from USUARIO WHERE tipo = 2")
+
+    cursor.execute("""
+        SELECT 
+            U.ID_USUARIO, 
+            U.NOME, 
+            U.EMAIL, 
+            M.MODA
+        FROM USUARIO U
+        JOIN MODALIDADES M ON U.ID_MODALIDADE = M.ID_MODALIDADE
+        WHERE U.TIPO = 2
+          AND M.ATIVO = 1
+        ORDER BY U.NOME
+    """)
+
     profli = cursor.fetchall()
     cursor.close()
-    return render_template('aluno-professores-lista.html', profli=profli, titulo='Dashboard aluno lista professor')
+
+    return render_template('aluno-professores-lista.html',profli=profli,titulo='Dashboard aluno lista professor')
 
 @app.route('/alunoavisos')
 def alunoavisos():
