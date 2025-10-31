@@ -1,6 +1,6 @@
 from flask import Flask, render_template, flash, request, url_for, redirect, session
 from flask_bcrypt import generate_password_hash, check_password_hash
-from datetime import date, datetime, timedelta
+from datetime import date
 import fdb
 
 app = Flask(__name__)
@@ -1187,7 +1187,7 @@ def adminadicionaraula():
             cursor.close()
             return redirect(url_for('adminadicionaraula'))
 
-        cursor.execute("SELECT 1 FROM AULA WHERE NOME = ?", (nome,))
+        cursor.execute("SELECT 1 FROM AULA WHERE UPPER(NOME) = UPPER(?)", (nome,))
         conflito_nome = cursor.fetchone()
 
         if conflito_nome:
@@ -1209,11 +1209,15 @@ def adminadicionaraula():
             cursor.close()
             return redirect(url_for('adminadicionaraula'))
 
+        nome_padronizado = nome.title()
+
+        descricao_padronizada = descricao.capitalize()
+
         cursor.execute("""
             INSERT INTO AULA 
                 (NOME, DESCRICAO, DIA_SEMANA, HORARIO, HORARIO_FINAL, CAPACIDADE, PROFESSOR_ID, ID_MODALIDADE) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (nome, descricao, dia_semana, horario, horario_final, capacidade, professor_id, id_da_modalidade))
+            """, (nome_padronizado, descricao_padronizada, dia_semana, horario, horario_final, capacidade, professor_id, id_da_modalidade))
 
         con.commit()
         cursor.close()
@@ -1243,10 +1247,7 @@ def adminadicionaraula():
 
     cursor.close()
 
-    return render_template('admin-adicionar-aula.html',
-                           modalidades=modalidades_lista,
-                           professores=professores_lista,
-                           titulo='Dashboard admin adicionar aula')
+    return render_template('admin-adicionar-aula.html',modalidades=modalidades_lista,professores=professores_lista,titulo='Dashboard admin adicionar aula')
 
 @app.route('/adminalunosmatriculados/<int:aula_id>')
 def adminalunosmatriculados(aula_id):
@@ -1419,8 +1420,11 @@ def adminadicionaraviso():
         titulo = request.form['titulo']
         descricao = request.form['descricao']
 
+        titulo_padronizado = titulo.title()
+        descricao_padronizada = descricao.capitalize()
+
         cursor = con.cursor()
-        cursor.execute("INSERT INTO aviso (titulo, descricao) VALUES (?, ?)", (titulo, descricao))
+        cursor.execute("INSERT INTO aviso (titulo, descricao) VALUES (?, ?)", (titulo_padronizado, descricao_padronizada))
         con.commit()
         cursor.close()
         flash('Aviso adicionado com sucesso!', 'success')
