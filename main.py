@@ -953,6 +953,10 @@ def adminadicionarmodalidades():
             flash('Nome da modalidade e vagas são obrigatórios.', 'erro')
             return render_template('admin-adicionar-modalidades.html', titulo='Adicionar modalidade')
 
+        if int(vagas) <= 0:
+            flash('O número de vagas deve ser maior que zero.', 'erro')
+            return render_template('admin-adicionar-modalidades.html', titulo='Adicionar modalidade', moda=moda,vagas=vagas)
+
         cursor = con.cursor()
 
         cursor.execute("SELECT 1 FROM MODALIDADES WHERE UPPER(MODA) = UPPER(?)", (moda,))
@@ -974,7 +978,6 @@ def adminadicionarmodalidades():
         flash('Modalidade adicionada com sucesso!', 'success')
         return redirect(url_for('adminmodalidadeslista'))
 
-    # Se for GET, apenas renderiza a página
     return render_template('admin-adicionar-modalidades.html', titulo='Adicionar modalidade')
 
 @app.route('/adminexcluirmodalidades/<int:id>', methods=['GET', 'POST'])
