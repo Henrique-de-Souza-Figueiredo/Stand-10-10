@@ -980,7 +980,7 @@ def adminadicionarmodalidades():
         conflito_moda = cursor.fetchone()
 
         if conflito_moda:
-            flash('Já existe essa modalidade (mesmo com letras maiúsculas/minúsculas diferentes).', 'erro')
+            flash('Já existe essa modalidade.', 'erro')
             cursor.close()
 
             return render_template('admin-adicionar-modalidades.html', titulo='Adicionar modalidade', moda=moda,vagas=vagas)
