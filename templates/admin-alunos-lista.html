@@ -37,7 +37,7 @@
                 <div class="perfil">
                     <img src="{{ url_for('static', filename='uploads/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/admin.png') }}';">
-                    <p>Admin</p>
+                    <p>{{nome}}</p>
                     <nav>
                         <a href="{{ url_for('admineditarconta') }}" class="btn">Editar conta</a>
                         <a href="{{ url_for('logout') }}" class="btn">Sair</a>
@@ -66,7 +66,7 @@
             <div class="perfil">
                 <img src="{{ url_for('static', filename='uploads/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/admin.png') }}';">
-                <p>Admin</p>
+                <p>{{nome}}</p>
                 <nav>
                     <a href="{{ url_for('admineditarconta') }}" class="btn">Editar conta</a>
                     <a href="{{ url_for('logout') }}" class="btn">Sair</a>
@@ -95,6 +95,8 @@
             <ul>
 
                 <li class="lista-item">
+                <img src="{{ url_for('static', filename='uploads/' + (usuario[0] | string) + '.jpg') }}" alt="Foto de Perfil"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png') }}';">
                     <p class="id">{{ usuario[0] }}</p>
                 <p><strong>Nome:</strong> {{ usuario[1] }}</p>
                 <p><strong>Email:</strong> {{ usuario[2] }}</p>

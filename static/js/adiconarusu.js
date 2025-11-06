@@ -33,4 +33,7 @@
             tipoSelecao.addEventListener('change', atualizarFormulario);
 
             atualizarFormulario();
+
+
         });
+
