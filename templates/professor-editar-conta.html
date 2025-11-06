@@ -27,7 +27,7 @@
     
 <form class="formulario" method="POST" enctype="multipart/form-data" action="{{ url_for('professoreditarconta') }}">
     <h1>O que deseja mudar?</h1>
-    <input type="file" name="img_perfil" accept=".jpg, .png">
+    <input type="file" name="img_perfil" class="file-input" accept=".jpg">
     <input type="text" name="nome" placeholder="Nome" value="{{ nome }}">
     <input type="email" name="email" placeholder="Email" value="{{ email }}">
     <input type="tel" minlength="10" maxlength="11" pattern="[0-9]{10,11}" inputmode="numeric" oninput="this.value = this.value.replace(/\D/g, '').slice(0,11);"

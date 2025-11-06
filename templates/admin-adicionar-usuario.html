@@ -29,7 +29,7 @@
 
 <form class="formulario" method="POST" enctype="multipart/form-data" action="{{ url_for('adminadicionarusuario') }}">
   <h1>Adicionar Usuário</h1>
-    <input type="file" name="img_perfil" accept=".jpg">
+    <input type="file" name="img_perfil" class="file-input" accept=".jpg">
 
   <select name="tipos" id="tipo-selecao" required>
     <option value="1">Aluno</option>

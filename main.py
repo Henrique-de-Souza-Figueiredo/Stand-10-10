@@ -1,6 +1,7 @@
 from flask import Flask, render_template, flash, request, url_for, redirect, session, send_from_directory
 from flask_bcrypt import generate_password_hash, check_password_hash
 from datetime import date
+from fpdf import FPDF
 import fdb
 
 app = Flask(__name__)
