@@ -69,10 +69,10 @@ def alunodashbord():
                    FROM (SELECT A.ID_AULA
                          FROM AULA A
                                   LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-                         WHERE A.DIA_SEMANA = ? -- Alterado
+                         WHERE A.DIA_SEMANA = ? 
                          GROUP BY A.ID_AULA, A.CAPACIDADE
                          HAVING COUNT(AA.ID_ALUNO) < A.CAPACIDADE) AS sub
-                   """, (dia_semana_hoje,))  # Passa o número do dia de hoje
+                   """, (dia_semana_hoje,))
     aulas_disponiveis_hoje = cursor.fetchone()[0]
 
     cursor.execute("""
@@ -166,19 +166,16 @@ def alunoaulaslista():
     cursor = con.cursor()
 
     if request.method == 'POST':
+
         id_aula = request.form['id_aula']
         acao = request.form['acao']
 
         if acao == 'inscrever':
 
-            # --- INÍCIO DA MODIFICAÇÃO 1: Verificação de Segurança (POST) ---
-            # Verifica se a aula ainda está ativa ANTES de se inscrever
             cursor.execute("""
-                           SELECT 1
-                           FROM AULA A
-                                    JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
-                           WHERE A.ID_AULA = ?
-                             AND M.ATIVO = 1
+                           SELECT 1 FROM AULA A
+                           JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
+                           WHERE A.ID_AULA = ? AND M.ATIVO = 1
                            """, (id_aula,))
             aula_ativa = cursor.fetchone()
 
@@ -186,78 +183,83 @@ def alunoaulaslista():
                 flash('Não é possível se inscrever. Esta aula pertence a uma modalidade que foi desativada.', 'erro')
                 cursor.close()
                 return redirect(url_for('alunoaulaslista'))
-            # --- FIM DA MODIFICAÇÃO 1 ---
 
-            # (Sua lógica de verificação de vagas - está correta)
+            cursor.execute("SELECT DIA_SEMANA, HORARIO, HORARIO_FINAL FROM AULA WHERE ID_AULA = ?", (id_aula,))
+            aula_alvo = cursor.fetchone()
+
+            if not aula_alvo:
+                flash('Aula não encontrada.', 'erro')
+                cursor.close()
+                return redirect(url_for('alunoaulaslista'))
+
+            alvo_dia, alvo_inicio, alvo_fim = aula_alvo
+
             cursor.execute("""
-                           SELECT A.CAPACIDADE, COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS
-                           FROM AULA A
-                                    LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-                           WHERE A.ID_AULA = ?
-                           GROUP BY A.ID_AULA, A.CAPACIDADE
-                           """, (id_aula,))
+                SELECT 1 FROM AULA A
+                JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+                WHERE AA.ID_ALUNO = ? AND A.DIA_SEMANA = ?
+                  AND (A.HORARIO < ?) AND (A.HORARIO_FINAL > ?)
+            """, (id_aluno, alvo_dia, alvo_fim, alvo_inicio))
+
+            conflito_horario = cursor.fetchone()
+
+            cursor.execute(
+                "SELECT A.CAPACIDADE, COUNT(AA.ID_ALUNO) FROM AULA A LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA WHERE A.ID_AULA = ? GROUP BY A.ID_AULA, A.CAPACIDADE",
+                (id_aula,))
+
             resultado_vagas = cursor.fetchone()
             capacidade_total = resultado_vagas[0] if resultado_vagas else 0
             vagas_ocupadas = resultado_vagas[1] if resultado_vagas else 0
-
             cursor.execute("SELECT 1 FROM AULA_ALUNO WHERE ID_ALUNO = ? AND ID_AULA = ?", (id_aluno, id_aula))
             ja_inscrito = cursor.fetchone()
 
-            if vagas_ocupadas >= capacidade_total:
+            if conflito_horario:
+                flash('Você já está inscrito em outra aula nesse mesmo dia e horário!', 'erro')
+            elif vagas_ocupadas >= capacidade_total:
                 flash('Esta aula está esgotada!', 'erro')
             elif ja_inscrito:
                 flash('Você já está inscrito nesta aula.', 'erro')
             else:
                 cursor.execute("INSERT INTO AULA_ALUNO (ID_ALUNO, ID_AULA) VALUES (?, ?)", (id_aluno, id_aula))
                 con.commit()
-                # --- INÍCIO DA MODIFICAÇÃO 2: Adicionar Flash de Sucesso ---
                 flash('Inscrição realizada com sucesso!', 'success')
-                # --- FIM DA MODIFICAÇÃO 2 ---
 
         elif acao == 'desinscrever':
             cursor.execute("DELETE FROM AULA_ALUNO WHERE ID_ALUNO = ? AND ID_AULA = ?", (id_aluno, id_aula))
             con.commit()
-            # --- INÍCIO DA MODIFICAÇÃO 3: Adicionar Flash de Sucesso ---
             flash('Inscrição cancelada.', 'success')
-            # --- FIM DA MODIFICAÇÃO 3 ---
 
         cursor.close()
         return redirect(url_for('alunoaulaslista'))
 
-    # --- INÍCIO DA MODIFICAÇÃO 4: Corrigir Consulta SQL (GET) ---
-    # 1. Adicionado JOIN MODALIDADES
-    # 2. Adicionado WHERE M.ATIVO = 1
-    # 3. Corrigido A.MODALIDADE para M.MODA
     cursor.execute("""
-                   SELECT A.ID_AULA,
+                   SELECT A.ID_AULA,         -- Índice 0
                           A.NOME,
                           A.DESCRICAO,
-                          A.DIA_SEMANA,
+                          A.DIA_SEMANA,      -- Índice 3
                           A.HORARIO,
                           A.HORARIO_FINAL,
-                          A.CAPACIDADE,
-                          U.NOME             AS PROFESSOR,
-                          M.MODA, -- Corrigido
-                          COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS
+                          A.CAPACIDADE,      -- Índice 6
+                          U.NOME AS PROFESSOR,
+                          M.MODA,
+                          COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS -- Índice 9
                    FROM AULA A
                             JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
-                            JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE -- Adicionado
+                            JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
                             LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-                   WHERE M.ATIVO = 1 -- Adicionado
+                   WHERE M.ATIVO = 1
                    GROUP BY A.ID_AULA, A.NOME, A.DESCRICAO, A.DIA_SEMANA,
                             A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME,
-                            M.MODA -- Corrigido
+                            M.MODA
                    ORDER BY A.DIA_SEMANA, A.HORARIO
                    """)
-    # --- FIM DA MODIFICAÇÃO 4 ---
 
     aulas_db = cursor.fetchall()
 
-    # (Sua lógica de buscar inscrições - Correta)
     cursor.execute("SELECT ID_AULA FROM AULA_ALUNO WHERE ID_ALUNO = ?", (id_aluno,))
+
     inscricoes = {row[0] for row in cursor.fetchall()}
 
-    # (Sua lógica de separar por dia - Correta)
     aulas_segunda = []
     aulas_terca = []
     aulas_quarta = []
@@ -265,21 +267,27 @@ def alunoaulaslista():
     aulas_sexta = []
 
     for aula in aulas_db:
-        dia = aula[3]  # DIA_SEMANA (Índice correto)
-        if dia == 1:
-            aulas_segunda.append(aula)
-        elif dia == 2:
-            aulas_terca.append(aula)
-        elif dia == 3:
-            aulas_quarta.append(aula)
-        elif dia == 4:
-            aulas_quinta.append(aula)
-        elif dia == 5:
-            aulas_sexta.append(aula)
+        capacidade_total = aula[6]
+        vagas_ocupadas = aula[9]
+        aula_id = aula[0]
+
+        if (vagas_ocupadas < capacidade_total) or (aula_id in inscricoes):
+
+            dia = aula[3]
+            if dia == 1:
+                aulas_segunda.append(aula)
+            elif dia == 2:
+                aulas_terca.append(aula)
+            elif dia == 3:
+                aulas_quarta.append(aula)
+            elif dia == 4:
+                aulas_quinta.append(aula)
+            elif dia == 5:
+                aulas_sexta.append(aula)
+
 
     cursor.close()
 
-    # (Seu render_template - Correto)
     return render_template('aluno-aulas-lista.html',
                            titulo='Dashboard aluno',
                            inscricoes=inscricoes,
@@ -551,7 +559,7 @@ def adminprofessoreslista():
                    SELECT U.ID_USUARIO,
                           U.NOME,
                           U.EMAIL,
-                          M.MODA, -- Esta é a nova "especialidade" (o nome vindo da tabela MODALIDADES)
+                          M.MODA, 
                           U.TENTATIVAS
                    FROM USUARIO AS U
                             LEFT JOIN MODALIDADES AS M ON U.ID_MODALIDADE = M.ID_MODALIDADE
@@ -1724,21 +1732,21 @@ def professoraulaslista():
                    SELECT A.ID_AULA,
                           A.NOME,
                           A.DESCRICAO,
-                          A.DIA_SEMANA,       -- Índice [3]
+                          A.DIA_SEMANA,    
                           A.HORARIO,
                           A.HORARIO_FINAL,
                           A.CAPACIDADE,
                           U.NOME AS PROFESSOR,
-                          M.MODA,             -- Índice [8] (Corrigido)
+                          M.MODA,     
                           COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS
                    FROM AULA A
                             JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
-                            JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE -- Adicionado
+                            JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE 
                             LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-                   WHERE A.PROFESSOR_ID = ? -- Filtro do professor (Correto)
+                   WHERE A.PROFESSOR_ID = ? 
                    GROUP BY A.ID_AULA, A.NOME, A.DESCRICAO, A.DIA_SEMANA,
                             A.HORARIO, A.HORARIO_FINAL, A.CAPACIDADE, U.NOME,
-                            M.MODA -- Corrigido
+                            M.MODA 
                    ORDER BY A.DIA_SEMANA, A.HORARIO
                    """, (id_professor,))
 
