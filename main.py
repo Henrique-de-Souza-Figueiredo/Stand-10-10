@@ -319,6 +319,8 @@ def alunoeditarconta():
         senha = request.form['senha']
         confsenha = request.form['confsenha']
 
+        nome_formatado = nome.title()
+
         if senha and senha != confsenha:
             flash('As senhas não conferem!', 'erro')
             return redirect(url_for('alunoeditarconta'))
@@ -348,10 +350,12 @@ def alunoeditarconta():
             senha_hash = generate_password_hash(senha)
 
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ?, senha = ? WHERE id_usuario = ?',
-                           (nome, email, telefone, senha_hash, idaluno))
+                           (nome_formatado, email, telefone, senha_hash, idaluno))
         else:
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ? WHERE id_usuario = ?',
-                           (nome, email, telefone, idaluno))
+                           (nome_formatado, email, telefone, idaluno))
+
+        session['nome'] = nome_formatado
 
         con.commit()
         arquivo = request.files['img_perfil']
@@ -1600,14 +1604,13 @@ def admineditarconta():
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ? WHERE id_usuario = ?',
                            (nome_formatado, email, telefone, idadmin))
 
+        session['nome'] = nome_formatado
         con.commit()
 
         arquivo = request.files['img_perfil']
         arquivo.save(f'static/uploads/{idadmin}.jpg')
 
         cursor.close()
-
-
 
         flash('Conta atualizada com sucesso!', 'success')
         return redirect(url_for('dashbordadmin'))
@@ -1637,7 +1640,6 @@ def professordashbord():
 
     id_professor = session['id_usuario']
 
-
     hoje = date.today()
 
     dia_semana_hoje = hoje.weekday() + 1
@@ -1663,6 +1665,7 @@ def professordashbord():
     cursor.close()
 
     return render_template('professor-dashbord.html',titulo='Dashboard Professor',total_hoje=total_hoje,total_semana=total_semana)
+
 @app.route('/professoreditarconta', methods=['GET', 'POST'])
 def professoreditarconta():
     if 'id_usuario' not in session:
@@ -1680,7 +1683,6 @@ def professoreditarconta():
         nome = request.form['nome']
         email = request.form['email']
         telefone = request.form['telefone']
-        especialidade = request.form['especialidade']
         senha = request.form['senha']
         confsenha = request.form['confsenha']
 
@@ -1689,7 +1691,7 @@ def professoreditarconta():
         if senha and senha != confsenha:
             flash('As senhas não conferem!', 'erro')
             return render_template('professor-editar-conta.html',
-                                   nome=nome, email=email, telefone=telefone, especialidade=especialidade)
+                                   nome=nome, email=email, telefone=telefone)
 
         cursor.execute('SELECT 1 FROM usuario WHERE email = ? AND id_usuario != ?', (email, idprofessor))
         if cursor.fetchone():
@@ -1710,23 +1712,25 @@ def professoreditarconta():
 
             if not (maiusculo and minuscula and numero and caracterEspecial):
                 flash("Sua senha deve ter uma letra maiúscula, uma letra minúscula, um caractere especial e um número.", 'erro')
-                return render_template('professor-editar-conta.html', nome=nome, email=email, telefone=telefone, especialidade=especialidade)
+                return render_template('professor-editar-conta.html', nome=nome, email=email, telefone=telefone)
 
             senha_hash = generate_password_hash(senha)
-            cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ?, especialidade = ?, senha = ? WHERE id_usuario = ?',
-                           (nome_formatado, email, telefone, especialidade, senha_hash, idprofessor))
+            cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ?, senha = ? WHERE id_usuario = ?',
+                           (nome_formatado, email, telefone, senha_hash, idprofessor))
         else:
-            cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ?, especialidade = ? WHERE id_usuario = ?',
-                           (nome_formatado, email, telefone, especialidade, idprofessor))
+            cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ? WHERE id_usuario = ?',
+                           (nome_formatado, email, telefone, idprofessor))
 
+        session['nome'] = nome_formatado
         con.commit()
         arquivo = request.files['img_perfil']
         arquivo.save(f'static/uploads/{idprofessor}.jpg')
         cursor.close()
+
         flash('Conta atualizada com sucesso!', 'success')
         return redirect(url_for('professordashbord'))
 
-    cursor.execute("SELECT nome, email, telefone, especialidade FROM usuario WHERE id_usuario = ?", (idprofessor,))
+    cursor.execute("SELECT nome, email, telefone, ID_MODALIDADE FROM usuario WHERE id_usuario = ?", (idprofessor,))
     dados = cursor.fetchone()
     cursor.close()
 
@@ -1886,6 +1890,9 @@ def cadastrar():
             return redirect(url_for('cadastro'))
         cursor.execute("insert into usuario(nome, email,telefone, senha, tipo,tentativas) values(?,?,?,?,1,0)",
                        (nome_formatado, email, telefone, senha_criptografada))
+
+        session['nome'] = nome_formatado
+
         con.commit()
     finally:
         cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
@@ -1919,8 +1926,7 @@ def login():
 
         cursor = con.cursor()
 
-        cursor.execute(
-            "SELECT id_usuario, nome, email, telefone, senha, ID_MODALIDADE, tipo, tentativas FROM usuario WHERE email = ?",
+        cursor.execute("SELECT id_usuario, nome, email, telefone, senha, ID_MODALIDADE, tipo, tentativas FROM usuario WHERE email = ?",
             (email,))
 
         usuario = cursor.fetchone()

@@ -30,9 +30,9 @@
                 <li><a href="{{ url_for('professoravisos') }}">Avisos</a></li>
             </ul>
             <div class="perfil">
-                 <img src="{{ url_for('static', filename='uploads/perfil/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
+                 <img src="{{ url_for('static', filename='uploads/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png') }}';">
-                <p>Professor</p>
+                <p>{{ session['nome'][:12] }}</p>
                 <nav>
                     <a href="{{ url_for('professoreditarconta') }}" class="btn">Editar conta</a>
                     <a href="{{ url_for('logout') }}" class="btn">Sair</a>
@@ -52,9 +52,9 @@
             </div>
 
             <div class="perfil">
-                 <img src="{{ url_for('static', filename='uploads/perfil/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
+                 <img src="{{ url_for('static', filename='uploads/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png') }}';">
-                <p>Professor</p>
+                <p>{{ session['nome'][:12] }}</p>
                 <nav>
                     <a href="{{ url_for('professoreditarconta') }}" class="btn">Editar conta</a>
                     <a href="{{ url_for('logout') }}" class="btn">Sair</a>
@@ -101,6 +101,9 @@
                 <div class="item-texto">
                     <p class="item-capacidade">Vagas: {{ aula[9] }} / {{ aula[6] }}</p>
                 </div>
+                <div class="item-actions">
+                        <a href="{{ url_for('professoralunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                    </div>
             </li>
             {% endfor %}
         </ul>
@@ -129,6 +132,9 @@
                 <div class="item-texto">
                     <p class="item-capacidade">Vagas: {{ aula[9] }} / {{ aula[6] }}</p>
                 </div>
+                <div class="item-actions">
+                        <a href="{{ url_for('professoralunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                    </div>
             </li>
             {% endfor %}
         </ul>
@@ -159,6 +165,9 @@
                 </div>
                 <div class="item-texto">
                     <p class="item-capacidade">Vagas: {{ aula[9] }} / {{ aula[6] }}</p>
+                </div>
+                <div class="item-actions">
+                        <a href="{{ url_for('professoralunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
                 </div>
             </li>
             {% endfor %}
@@ -191,6 +200,9 @@
                 <div class="item-texto">
                     <p class="item-capacidade">Vagas: {{ aula[9] }} / {{ aula[6] }}</p>
                 </div>
+                <div class="item-actions">
+                        <a href="{{ url_for('professoralunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
+                </div>
             </li>
             {% endfor %}
         </ul>
@@ -221,6 +233,9 @@
                 </div>
                 <div class="item-texto">
                    <p class="item-capacidade">Vagas: {{ aula[9] }} / {{ aula[6] }}</p>
+                </div>
+                <div class="item-actions">
+                        <a href="{{ url_for('professoralunosmatriculados', aula_id=aula[0]) }}" class="btn btn-ver">Alunos</a>
                 </div>
             </li>
             {% endfor %}

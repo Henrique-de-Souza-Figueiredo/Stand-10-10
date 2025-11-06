@@ -30,9 +30,9 @@
                 <li><a href="{{ url_for('professoravisos') }}">Avisos</a></li>
             </ul>
             <div class="perfil">
-            <img src="{{ url_for('static', filename='uploads/perfil/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
-            onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png') }}';">
-                <p>Professor</p>
+            <img src="{{ url_for('static', filename='uploads/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png') }}';">
+                <p>{{ session['nome'][:12] }}</p>
                 <nav>
                     <a href="{{ url_for('professoreditarconta') }}" class="btn">Editar conta</a>
                     <a href="{{ url_for('logout') }}" class="btn">Sair</a>
@@ -53,9 +53,9 @@
             </div>
 
             <div class="perfil">
-                 <img src="{{ url_for('static', filename='uploads/perfil/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
-                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png') }}';">
-                <p>Professor</p>
+                <img src="{{ url_for('static', filename='uploads/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png') }}';">
+                <p>{{ session['nome'][:12] }}</p>
                 <nav>
                     <a href="{{ url_for('professoreditarconta') }}" class="btn">Editar conta</a>
                     <a href="{{ url_for('logout') }}" class="btn">Sair</a>
