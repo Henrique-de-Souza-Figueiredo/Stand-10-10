@@ -36,7 +36,8 @@
                     <li><a href="{{ url_for('adminavisos') }}">Avisos</a></li>
                 </ul>
                 <div class="perfil">
-                    <img src="../static/img/admin.png" alt="Ícone do admin">
+                    <img src="{{ url_for('static', filename='uploads/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/admin.png') }}';">
                     <p>Admin</p>
                     <nav>
                         <a href="{{ url_for('admineditarconta') }}" class="btn">Editar conta</a>
@@ -64,7 +65,8 @@
             </div>
 
             <div class="perfil">
-                <img src="../static/img/admin.png" alt="Ícone do admin">
+                <img src="{{ url_for('static', filename='uploads/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/admin.png') }}';">
                 <p>Admin</p>
                 <nav>
                     <a href="{{ url_for('admineditarconta') }}" class="btn">Editar conta</a>
