@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, request, url_for, redirect, session
+from flask import Flask, render_template, flash, request, url_for, redirect, session, send_from_directory
 from flask_bcrypt import generate_password_hash, check_password_hash
 from datetime import date
 import fdb
@@ -1586,7 +1586,13 @@ def admineditarconta():
                            (nome, email, telefone, idadmin))
 
         con.commit()
+
+        arquivo = request.files['img_perfil']
+        arquivo.save(f'static/uploads/{idadmin}.jpg')
+
         cursor.close()
+
+
 
         flash('Conta atualizada com sucesso!', 'success')
         return redirect(url_for('dashbordadmin'))
@@ -1867,6 +1873,10 @@ def cadastrar():
     flash("O usuario foi cadastrado com sucesso", 'success')
     return redirect(url_for('login'))
 
+
+@app.route('/uploads/<nome_arquivo>')
+def imagem(nome_arquivo):
+    return send_from_directory('uploads', nome_arquivo)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
