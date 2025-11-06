@@ -1723,8 +1723,12 @@ def professoreditarconta():
 
         session['nome'] = nome_formatado
         con.commit()
+
+
         arquivo = request.files['img_perfil']
         arquivo.save(f'static/uploads/{idprofessor}.jpg')
+
+
         cursor.close()
 
         flash('Conta atualizada com sucesso!', 'success')

@@ -31,7 +31,7 @@
   <select name="especialidade" id="campo-especialidade" required>
       <option value="">Selecione uma modalidade</option>
       {% for modalidade in modalidades %}
-        <option value="{{ modalidade[1] }}" {% if modalidade[1] == especialidade %}selected{% endif %}>
+        <option value="{{ modalidade[0] }}" {% if modalidade[1] == especialidade %}selected{% endif %}>
             {{ modalidade[1] }}
         </option>
       {% endfor %}
@@ -44,8 +44,8 @@
      title="Digite apenas números, 10 a 11 dígitos"
      name="telefone" placeholder="Digite o Telefone" value="{{ telefone }}" required>
 
-  <input type="password" minlength="8" maxlength="16" name="senha" placeholder="Digite a Nova Senha" required>
-  <input type="password" minlength="8" maxlength="16" name="confsenha" placeholder="Confirme a Nova Senha" required>
+  <input type="password" minlength="8" maxlength="16" name="senha" placeholder="Digite a Nova Senha">
+  <input type="password" minlength="8" maxlength="16" name="confsenha" placeholder="Confirme a Nova Senha">
 
   <a href="{{ url_for('adminprofessoreslista') }}">Cancelar</a>
 

@@ -94,6 +94,8 @@
             {% for usuario in alunosmatriculado %}
             <ul>
                 <li class="lista-item">
+                <img src="{{ url_for('static', filename='uploads/' + (usuario[0] | string) + '.jpg') }}" alt="Foto de Perfil"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png') }}';">
                 <p class="id">{{ usuario[0] }}</p>
                 <p><strong>Nome:</strong> {{ usuario[1] }}</p>
                 <p><strong>Email:</strong> {{ usuario[2] }}</p>
