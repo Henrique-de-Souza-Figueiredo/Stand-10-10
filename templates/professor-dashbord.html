@@ -30,8 +30,8 @@
                 <li><a href="{{ url_for('professoravisos') }}">Avisos</a></li>
             </ul>
             <div class="perfil">
-                 <img src="{{ url_for('static', filename='uploads/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
-                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png) }}';">
+            <img src="{{ url_for('static', filename='uploads/perfil/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
+            onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png') }}';">
                 <p>Professor</p>
                 <nav>
                     <a href="{{ url_for('professoreditarconta') }}" class="btn">Editar conta</a>
@@ -53,8 +53,8 @@
             </div>
 
             <div class="perfil">
-                 <img src="{{ url_for('static', filename='uploads/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
-                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png) }}';">
+                 <img src="{{ url_for('static', filename='uploads/perfil/' + (session['id_usuario'] | string) + '.jpg') }}" alt="Foto de Perfil"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/prof e aluno.png') }}';">
                 <p>Professor</p>
                 <nav>
                     <a href="{{ url_for('professoreditarconta') }}" class="btn">Editar conta</a>

@@ -472,6 +472,8 @@ def admineditaralunos(id):
         senha = request.form['senha']
         confsenha = request.form['confsenha']
 
+        nome_formatado = nome.title()
+
         if senha and senha != confsenha:
             flash('As senhas não conferem!', 'erro')
             return render_template("admin-editar-aluno.html", id=id, nome=nome, email=email, telefone=telefone)
@@ -499,10 +501,10 @@ def admineditaralunos(id):
 
             senha_hash = generate_password_hash(senha)
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ?, senha = ? WHERE id_usuario = ?',
-                            (nome, email, telefone, senha_hash, id))
+                            (nome_formatado, email, telefone, senha_hash, id))
         else:
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ? WHERE id_usuario = ?',
-                            (nome, email, telefone, id))
+                            (nome_formatado, email, telefone, id))
 
         con.commit()
         cursor.close()
@@ -606,6 +608,8 @@ def admineditarprofessor(id):
         senha = request.form['senha']
         confsenha = request.form['confsenha']
 
+        nome_formatado = nome.title()
+
         if senha and senha != confsenha:
             flash('As senhas não conferem!', 'erro')
             return render_template("admin-editar-professor.html",
@@ -645,14 +649,14 @@ def admineditarprofessor(id):
                            UPDATE usuario
                            SET nome = ?, email = ?, telefone = ?, ID_MODALIDADE = ?, senha = ?
                            WHERE id_usuario = ?
-                           """, (nome, email, telefone, especialidade_id, senha_hash, id))
+                           """, (nome_formatado, email, telefone, especialidade_id, senha_hash, id))
 
         else:
             cursor.execute("""
                 UPDATE usuario 
                 SET nome = ?, email = ?, telefone = ?, ID_MODALIDADE = ? 
                 WHERE id_usuario = ?
-            """, (nome, email, telefone, especialidade_id, id))
+            """, (nome_formatado, email, telefone, especialidade_id, id))
 
         con.commit()
         cursor.close()
@@ -874,6 +878,8 @@ def adminadicionarusuario():
         senha = request.form['senha']
         confsenha = request.form['confsenha']
 
+        nome_formatado = nome.title()
+
         cursor = con.cursor()
         try:
             cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
@@ -899,13 +905,13 @@ def adminadicionarusuario():
                 cursor.execute("""
                                INSERT INTO usuario (nome, email, telefone, ID_MODALIDADE, senha, tipo, tentativas)
                                VALUES (?, ?, ?, ?, ?, ?, 0)
-                               """, (nome, email, telefone, especialidade_id, senha_hash, tipo))
+                               """, (nome_formatado, email, telefone, especialidade_id, senha_hash, tipo))
             else:
 
                 cursor.execute("""
                     INSERT INTO usuario (nome, email, telefone, ID_MODALIDADE, senha, tipo, tentativas)
                     VALUES (?, ?, ?, ?, ?, ?, 0)
-                    """, (nome, email, telefone, None, senha_hash, tipo))
+                    """, (nome_formatado, email, telefone, None, senha_hash, tipo))
 
             con.commit()
             cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
@@ -1558,6 +1564,8 @@ def admineditarconta():
         senha = request.form['senha']
         confsenha = request.form['confsenha']
 
+        nome_formatado = nome.title()
+
         if senha and senha != confsenha:
             flash('As senhas não conferem!', 'erro')
             return redirect(url_for('admineditarconta'))
@@ -1587,10 +1595,10 @@ def admineditarconta():
             senha_hash = generate_password_hash(senha)
 
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ?, senha = ? WHERE id_usuario = ?',
-                           (nome, email, telefone, senha_hash, idadmin))
+                           (nome_formatado, email, telefone, senha_hash, idadmin))
         else:
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ? WHERE id_usuario = ?',
-                           (nome, email, telefone, idadmin))
+                           (nome_formatado, email, telefone, idadmin))
 
         con.commit()
 
@@ -1676,6 +1684,8 @@ def professoreditarconta():
         senha = request.form['senha']
         confsenha = request.form['confsenha']
 
+        nome_formatado = nome.title()
+
         if senha and senha != confsenha:
             flash('As senhas não conferem!', 'erro')
             return render_template('professor-editar-conta.html',
@@ -1704,10 +1714,10 @@ def professoreditarconta():
 
             senha_hash = generate_password_hash(senha)
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ?, especialidade = ?, senha = ? WHERE id_usuario = ?',
-                           (nome, email, telefone, especialidade, senha_hash, idprofessor))
+                           (nome_formatado, email, telefone, especialidade, senha_hash, idprofessor))
         else:
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ?, especialidade = ? WHERE id_usuario = ?',
-                           (nome, email, telefone, especialidade, idprofessor))
+                           (nome_formatado, email, telefone, especialidade, idprofessor))
 
         con.commit()
         arquivo = request.files['img_perfil']
@@ -1724,9 +1734,9 @@ def professoreditarconta():
         flash('Erro ao carregar informações da conta.', 'error')
         return redirect(url_for('professordashbord'))
 
-    nome, email, telefone, especialidade = dados
+    nome_formatado, email, telefone, especialidade = dados
 
-    return render_template('professor-editar-conta.html', nome=nome, email=email, telefone=telefone, especialidade=especialidade)
+    return render_template('professor-editar-conta.html', nome=nome_formatado, email=email, telefone=telefone, especialidade=especialidade)
 
 
 @app.route('/professoraulaslista')
@@ -1826,11 +1836,9 @@ def professoralunosmatriculados(aula_id):
 
     cursor = con.cursor()
 
-    # Pega dados da aula
     cursor.execute("SELECT NOME FROM AULA WHERE ID_AULA = ?", (aula_id,))
     aula = cursor.fetchone()
 
-    # Pega alunos matriculados na aula
     cursor.execute("SELECT U.ID_USUARIO, U.NOME, U.EMAIL FROM AULA_ALUNO AA JOIN USUARIO U ON AA.ID_ALUNO = U.ID_USUARIO WHERE AA.ID_AULA = ?",
                    (aula_id,))
     alunosmatriculado = cursor.fetchall()
@@ -1846,6 +1854,8 @@ def cadastrar():
     telefone = request.form['telefone']
     senha = request.form['senha']
     confirmar_senha = request.form['confsenha']
+
+    nome_formatado = nome.title()
 
     if senha != confirmar_senha:
         flash("As senhas não coincidem", 'error')
@@ -1875,7 +1885,7 @@ def cadastrar():
             flash("Esse email já está cadastrado", 'error')
             return redirect(url_for('cadastro'))
         cursor.execute("insert into usuario(nome, email,telefone, senha, tipo,tentativas) values(?,?,?,?,1,0)",
-                       (nome, email, telefone, senha_criptografada))
+                       (nome_formatado, email, telefone, senha_criptografada))
         con.commit()
     finally:
         cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
