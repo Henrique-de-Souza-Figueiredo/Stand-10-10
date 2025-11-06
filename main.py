@@ -354,6 +354,8 @@ def alunoeditarconta():
                            (nome, email, telefone, idaluno))
 
         con.commit()
+        arquivo = request.files['img_perfil']
+        arquivo.save(f'static/uploads/{idaluno}.jpg')
         cursor.close()
 
         flash('Conta atualizada com sucesso!', 'success')
@@ -906,6 +908,11 @@ def adminadicionarusuario():
                     """, (nome, email, telefone, None, senha_hash, tipo))
 
             con.commit()
+            cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
+            idusuario = cursor.fetchone()[0]
+            arquivo = request.files['img_perfil']
+            arquivo.save(f'static/uploads/{idusuario}.jpg')
+
             flash('Usuário cadastrado com sucesso!', 'success')
             return redirect(url_for('dashbordadmin'))
 
@@ -1703,6 +1710,8 @@ def professoreditarconta():
                            (nome, email, telefone, especialidade, idprofessor))
 
         con.commit()
+        arquivo = request.files['img_perfil']
+        arquivo.save(f'static/uploads/{idprofessor}.jpg')
         cursor.close()
         flash('Conta atualizada com sucesso!', 'success')
         return redirect(url_for('professordashbord'))
@@ -1869,6 +1878,10 @@ def cadastrar():
                        (nome, email, telefone, senha_criptografada))
         con.commit()
     finally:
+        cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
+        idusuario = cursor.fetchone()[0]
+        arquivo = request.files['img_perfil']
+        arquivo.save(f'static/uploads/{idusuario}.jpg')
         cursor.close()
     flash("O usuario foi cadastrado com sucesso", 'success')
     return redirect(url_for('login'))

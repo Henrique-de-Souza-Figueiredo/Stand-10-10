@@ -7,23 +7,26 @@
             function atualizarFormulario() {
                 const tipoEscolhido = tipoSelecao.value;
 
-                if (tipoEscolhido === '1') {
-                    tituloFormulario.textContent = 'Adicionar Aluno';
-                    campoEspecialidade.style.display = 'none';
+              if (tipoEscolhido === '1') {
+                tituloFormulario.textContent = 'Adicionar Aluno';
+                campoEspecialidade.style.display = 'none';
+                campoEspecialidade.required = false; // <-- MODIFICAÇÃO (Não é mais obrigatório)
 
-                } else if (tipoEscolhido === '2') {
-                    tituloFormulario.textContent = 'Adicionar Professor';
-                    campoEspecialidade.style.display = 'block';
+            } else if (tipoEscolhido === '2') {
+                tituloFormulario.textContent = 'Adicionar Professor';
+                campoEspecialidade.style.display = 'block';
+                campoEspecialidade.required = true; // <-- MODIFICAÇÃO (É obrigatório)
 
-                } else if (tipoEscolhido === '3') {
-                    tituloFormulario.textContent = 'Adicionar Admin';
-                    campoEspecialidade.style.display = 'none';
+            } else if (tipoEscolhido === '3') {
+                tituloFormulario.textContent = 'Adicionar Admin';
+                campoEspecialidade.style.display = 'none';
+                campoEspecialidade.required = false; // <-- MODIFICAÇÃO (Não é mais obrigatório)
 
-                } else {
-                    tituloFormulario.textContent = 'Adicionar Usuário';
-                    campoEspecialidade.style.display = 'none';
-                }
-
+            } else {
+                tituloFormulario.textContent = 'Adicionar Usuário';
+                campoEspecialidade.style.display = 'none';
+                campoEspecialidade.required = false; // <-- MODIFICAÇÃO (Não é mais obrigatório)
+            }
 
             }
 

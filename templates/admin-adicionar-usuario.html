@@ -27,8 +27,9 @@
         {% endif %}
         {% endwith %}
 
-<form class="formulario" method="POST" action="{{ url_for('adminadicionarusuario') }}">
+<form class="formulario" method="POST" enctype="multipart/form-data" action="{{ url_for('adminadicionarusuario') }}">
   <h1>Adicionar Usuário</h1>
+    <input type="file" name="img_perfil" accept=".jpg">
 
   <select name="tipos" id="tipo-selecao" required>
     <option value="1">Aluno</option>
@@ -36,7 +37,7 @@
     <option value="3">Admin</option>
     </select>
 
-    <select name="especialidade" id="campo-especialidade" required>
+    <select name="especialidade" id="campo-especialidade">
     <option value="">Selecione uma modalidade</option>
     {% for modalidade in modalidades %}
        <option value="{{ modalidade[0] }}">{{ modalidade[1] }}</option>
