@@ -1873,19 +1873,38 @@ def aulaslivresprofessor():
     cursor = con.cursor()
     cursor.execute(""" 
                 SELECT
-                    A.ID_AULA, A.NOME, A.CAPACIDADE,
-                    COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
-                    M.MODA AS NOME_MODALIDADE
-                FROM AULA A
-                LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-                JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
-                WHERE
-                    M.ATIVO = 1
-                    AND A.PROFESSOR_ID = ?  -- (O '?' será substituído)
-                GROUP BY
-                    A.ID_AULA, A.NOME, A.CAPACIDADE, M.MODA
-                HAVING
-                    COUNT(AA.ID_ALUNO) < A.CAPACIDADE; -- (Corrigido para aulas CHEIAS)
+            CASE A.DIA_SEMANA
+                WHEN 1 THEN 'Segunda'
+                WHEN 2 THEN 'Terça'
+                WHEN 3 THEN 'Quarta'
+                WHEN 4 THEN 'Quinta'
+                WHEN 5 THEN 'Sexta'
+            END AS NOME_DIA_SEMANA,
+
+            A.ID_AULA,
+            A.NOME,
+            A.CAPACIDADE,
+            COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
+            M.MODA AS NOME_MODALIDADE
+        FROM
+            AULA A
+        LEFT JOIN
+            AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+        JOIN
+            MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
+        WHERE
+            M.ATIVO = 1
+            AND A.PROFESSOR_ID = ?  
+        GROUP BY
+            A.DIA_SEMANA,
+            A.ID_AULA, 
+            A.NOME, 
+            A.CAPACIDADE, 
+            M.MODA
+        HAVING
+            COUNT(AA.ID_ALUNO) < A.CAPACIDADE
+        ORDER BY
+            A.DIA_SEMANA;  
             """, (id_professor,))
     aulaslivres = cursor.fetchall()
     cursor.close()
@@ -1924,8 +1943,8 @@ def aulaslivresprofessor():
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Arial", "B", 12)
 
-    col_widths = [20, 60, 25, 30, 50]
-    headers = ["ID", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+    col_widths = [30, 60, 25, 30, 50]
+    headers = ["Dia da Semana", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
 
     for i in range(len(headers)):
         pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
@@ -1971,20 +1990,38 @@ def aulascheiasprofessor():
 
     cursor = con.cursor()
     cursor.execute(""" 
-                SELECT
-                    A.ID_AULA, A.NOME, A.CAPACIDADE,
-                    COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
-                    M.MODA AS NOME_MODALIDADE
-                FROM AULA A
-                LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-                JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
-                WHERE
-                    M.ATIVO = 1
-                    AND A.PROFESSOR_ID = ?  
-                GROUP BY
-                    A.ID_AULA, A.NOME, A.CAPACIDADE, M.MODA
-                HAVING
-                    COUNT(AA.ID_ALUNO) = A.CAPACIDADE; 
+        SELECT
+            CASE A.DIA_SEMANA
+                WHEN 1 THEN 'Segunda'
+                WHEN 2 THEN 'Terça'
+                WHEN 3 THEN 'Quarta'
+                WHEN 4 THEN 'Quinta'
+                WHEN 5 THEN 'Sexta'
+            END AS NOME_DIA_SEMANA,
+            A.ID_AULA,
+            A.NOME,
+            A.CAPACIDADE,
+            COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
+            M.MODA AS NOME_MODALIDADE
+        FROM
+            AULA A
+        LEFT JOIN
+            AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+        JOIN
+            MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
+        WHERE
+            M.ATIVO = 1
+            AND A.PROFESSOR_ID = ?  
+        GROUP BY
+            A.DIA_SEMANA,
+            A.ID_AULA, 
+            A.NOME, 
+            A.CAPACIDADE, 
+            M.MODA
+        HAVING
+            COUNT(AA.ID_ALUNO) = A.CAPACIDADE  
+        ORDER BY
+            A.DIA_SEMANA;
             """, (id_professor,))
 
     aulascheias = cursor.fetchall()
@@ -2025,8 +2062,8 @@ def aulascheiasprofessor():
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Arial", "B", 12)
 
-    col_widths = [20, 60, 25, 30, 50]
-    headers = ["ID", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+    col_widths = [30, 60, 25, 30, 50]
+    headers = ["Dia da Semana", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
 
     for i in range(len(headers)):
         pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
@@ -2062,24 +2099,37 @@ def aulascheiasprofessor():
 def aulaslivres():
     cursor = con.cursor()
     cursor.execute(""" 
-        SELECT
-        A.ID_AULA,
-        A.NOME,
-        A.CAPACIDADE,
-        COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
-        M.MODA AS NOME_MODALIDADE
-    FROM
-        AULA A
-    LEFT JOIN
-        AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-    JOIN
-        MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
-    WHERE
-        M.ATIVO = 1 
-    GROUP BY
-        A.ID_AULA, A.NOME, A.CAPACIDADE, M.MODA
-    HAVING
-      COUNT(AA.ID_ALUNO) < A.CAPACIDADE;
+                    SELECT
+            CASE A.DIA_SEMANA
+                WHEN 1 THEN 'Segunda'
+                WHEN 2 THEN 'Terça'
+                WHEN 3 THEN 'Quarta'
+                WHEN 4 THEN 'Quinta'
+                WHEN 5 THEN 'Sexta'
+            END AS NOME_DIA_SEMANA,
+            A.ID_AULA,
+            A.NOME,
+            A.CAPACIDADE,
+            COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
+            M.MODA AS NOME_MODALIDADE
+        FROM
+            AULA A
+        LEFT JOIN
+            AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+        JOIN
+            MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
+        WHERE
+            M.ATIVO = 1
+        GROUP BY
+            A.DIA_SEMANA,
+            A.ID_AULA, 
+            A.NOME, 
+            A.CAPACIDADE, 
+            M.MODA
+        HAVING
+            COUNT(AA.ID_ALUNO) < A.CAPACIDADE
+        ORDER BY
+            A.DIA_SEMANA;
     """)
     aulaslivres = cursor.fetchall()
     cursor.close()
@@ -2118,8 +2168,8 @@ def aulaslivres():
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Arial", "B", 12)
 
-    col_widths = [20, 60, 25, 30, 50]
-    headers = ["ID", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+    col_widths = [30, 60, 25, 30, 50]
+    headers = ["Dia da Semana", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
 
     for i in range(len(headers)):
         pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
@@ -2156,23 +2206,36 @@ def aulascheias():
     cursor = con.cursor()
     cursor.execute(""" 
         SELECT
-        A.ID_AULA,
-        A.NOME,
-        A.CAPACIDADE,
-        COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
-        M.MODA AS NOME_MODALIDADE
-    FROM
-        AULA A
-    LEFT JOIN
-        AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
-    JOIN
-        MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
-    WHERE
-        M.ATIVO = 1 
-    GROUP BY
-        A.ID_AULA, A.NOME, A.CAPACIDADE, M.MODA
-    HAVING
-      COUNT(AA.ID_ALUNO) = A.CAPACIDADE;
+            CASE A.DIA_SEMANA
+                WHEN 1 THEN 'Segunda'
+                WHEN 2 THEN 'Terça'
+                WHEN 3 THEN 'Quarta'
+                WHEN 4 THEN 'Quinta'
+                WHEN 5 THEN 'Sexta'
+            END AS NOME_DIA_SEMANA,
+            A.ID_AULA,
+            A.NOME,
+            A.CAPACIDADE,
+            COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
+            M.MODA AS NOME_MODALIDADE
+        FROM
+            AULA A
+        LEFT JOIN
+            AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+        JOIN
+            MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
+        WHERE
+            M.ATIVO = 1
+        GROUP BY
+            A.DIA_SEMANA,
+            A.ID_AULA, 
+            A.NOME, 
+            A.CAPACIDADE, 
+            M.MODA
+        HAVING
+            COUNT(AA.ID_ALUNO) = A.CAPACIDADE
+        ORDER BY
+            A.DIA_SEMANA;
     """)
     aulascheias = cursor.fetchall()
     cursor.close()
@@ -2212,8 +2275,8 @@ def aulascheias():
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Arial", "B", 12)
 
-    col_widths = [20, 60, 25, 30, 50]
-    headers = ["ID", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+    col_widths = [30, 60, 25, 30, 50]
+    headers = ["Dia da Semana", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
 
     for i in range(len(headers)):
         pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
