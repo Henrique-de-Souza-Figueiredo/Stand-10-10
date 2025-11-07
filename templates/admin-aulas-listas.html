@@ -87,11 +87,16 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
+          <div class="lista-header">
             <div class="lista-header">
-                <h1>Aulas</h1>
+             <h1>Aulas</h1>
+            </div>
+            <div class="lista-header_alternativa">
+                <a href="{{ url_for('aulascheias') }}" class="btn btn-deletar">Gerar Relatório de Aulas Cheias (PDF)</a>
+                <a href="{{ url_for('aulaslivres') }}" class="btn btn-editar">Gerar Relatório de Aulas livres (PDF)</a>
                 <a href="{{ url_for('adminadicionaraula') }}" class="btn btn-adicionar">Adicionar +</a>
             </div>
-
+          </div>
     <div class="lista-scroll">
 
     <h2 class="dia-titulo">Segunda-feira</h2>

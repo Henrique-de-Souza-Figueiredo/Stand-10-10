@@ -772,6 +772,13 @@ h5 {
     margin-bottom: var(--esp-xl);
 }
 
+.lista-header_alternativa {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: var(--esp-xl);
+}
+
 
 .lista-header h1 {
     font-size: 2em;

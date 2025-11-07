@@ -1,6 +1,6 @@
-from flask import Flask, render_template, flash, request, url_for, redirect, session, send_from_directory
+from flask import Flask, render_template, flash, request, url_for, redirect, session, send_from_directory, send_file
 from flask_bcrypt import generate_password_hash, check_password_hash
-from datetime import date
+from datetime import date, datetime
 from fpdf import FPDF
 import fdb
 
@@ -234,16 +234,16 @@ def alunoaulaslista():
         return redirect(url_for('alunoaulaslista'))
 
     cursor.execute("""
-                   SELECT A.ID_AULA,         -- Índice 0
+                   SELECT A.ID_AULA,        
                           A.NOME,
                           A.DESCRICAO,
-                          A.DIA_SEMANA,      -- Índice 3
+                          A.DIA_SEMANA,      
                           A.HORARIO,
                           A.HORARIO_FINAL,
-                          A.CAPACIDADE,      -- Índice 6
+                          A.CAPACIDADE,     
                           U.NOME AS PROFESSOR,
                           M.MODA,
-                          COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS -- Índice 9
+                          COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS 
                    FROM AULA A
                             JOIN USUARIO U ON A.PROFESSOR_ID = U.ID_USUARIO
                             JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
@@ -1855,6 +1855,393 @@ def professoralunosmatriculados(aula_id):
     cursor.close()
 
     return render_template('professor-alunos-matriculados.html', aula=aula, alunosmatriculado=alunosmatriculado, titulo='Dashboard professor alunos matriculados')
+
+@app.route('/aulaslivresprofessor', methods=['GET'])
+def aulaslivresprofessor():
+    if 'id_usuario' not in session:
+        flash('Você precisa estar logado para acessar essa página.', 'erro')
+        return redirect(url_for('login'))
+
+    if session.get('tipo') != 2:
+        flash('Acesso negado. Apenas professores nessa pagina', 'erro')
+        return redirect(url_for('login'))
+
+    id_professor = session['id_usuario']
+
+    cursor = con.cursor()
+    cursor.execute(""" 
+                SELECT
+                    A.ID_AULA, A.NOME, A.CAPACIDADE,
+                    COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
+                    M.MODA AS NOME_MODALIDADE
+                FROM AULA A
+                LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+                JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
+                WHERE
+                    M.ATIVO = 1
+                    AND A.PROFESSOR_ID = ?  -- (O '?' será substituído)
+                GROUP BY
+                    A.ID_AULA, A.NOME, A.CAPACIDADE, M.MODA
+                HAVING
+                    COUNT(AA.ID_ALUNO) < A.CAPACIDADE; -- (Corrigido para aulas CHEIAS)
+            """, (id_professor,))
+    aulaslivres = cursor.fetchall()
+    cursor.close()
+
+    class PDF(FPDF):
+        def header(self):
+            # Título
+            self.set_font("Arial", "B", 16)
+            self.set_text_color(0, 0, 0)  # preto (#000000)
+            self.cell(0, 10, "Relatório de Aulas Livres", ln=True, align='C')
+
+            self.set_font("Arial", "", 10)
+            self.set_text_color(80, 80, 80)
+            self.cell(0, 8, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ln=True, align='C')
+            self.ln(5)
+
+            # Linha separadora  (#1ecca8)
+            self.set_draw_color(30, 204, 168)
+            self.set_line_width(0.8)
+            self.line(10, self.get_y(), 200, self.get_y())
+            self.ln(8)
+
+        def footer(self):
+            # Número da página
+            self.set_y(-15)
+            self.set_font("Arial", "I", 9)
+            self.set_text_color(80, 80, 80)
+            self.cell(0, 10, f"Página {self.page_no()}/{{nb}}", align='C')
+
+    pdf = PDF()
+    pdf.alias_nb_pages()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    pdf.set_fill_color(3, 190, 143)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Arial", "B", 12)
+
+    col_widths = [20, 60, 25, 30, 50]
+    headers = ["ID", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+
+    for i in range(len(headers)):
+        pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
+    pdf.ln()
+
+    # Linhas da tabela
+    pdf.set_font("Arial", size=11)
+    pdf.set_text_color(0, 0, 0)  # preto
+
+    fill = False
+    for aula in aulaslivres:
+        if fill:
+            pdf.set_fill_color(0, 237, 172, 40)
+        else:
+            # branco
+            pdf.set_fill_color(255, 255, 255)
+
+        pdf.cell(col_widths[0], 8, str(aula[0]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[2], 8, str(aula[2]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[3], 8, str(aula[3]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='L', fill=fill)
+
+        pdf.ln()
+        fill = not fill
+
+    pdf_path = "relatorio_aulas_livres_professor.pdf"
+    pdf.output(pdf_path)
+    return send_file(pdf_path, as_attachment=True, mimetype='application/pdf')
+
+
+@app.route('/aulascheiasprofessor', methods=['GET'])
+def aulascheiasprofessor():
+    if 'id_usuario' not in session:
+        flash('Você precisa estar logado para acessar essa página.', 'erro')
+        return redirect(url_for('login'))
+
+    if session.get('tipo') != 2:
+        flash('Acesso negado. Apenas professores nessa pagina', 'erro')
+        return redirect(url_for('login'))
+
+    id_professor = session['id_usuario']
+
+    cursor = con.cursor()
+    cursor.execute(""" 
+                SELECT
+                    A.ID_AULA, A.NOME, A.CAPACIDADE,
+                    COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
+                    M.MODA AS NOME_MODALIDADE
+                FROM AULA A
+                LEFT JOIN AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+                JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
+                WHERE
+                    M.ATIVO = 1
+                    AND A.PROFESSOR_ID = ?  
+                GROUP BY
+                    A.ID_AULA, A.NOME, A.CAPACIDADE, M.MODA
+                HAVING
+                    COUNT(AA.ID_ALUNO) = A.CAPACIDADE; 
+            """, (id_professor,))
+
+    aulascheias = cursor.fetchall()
+    cursor.close()
+
+    class PDF(FPDF):
+        def header(self):
+            # Título
+            self.set_font("Arial", "B", 16)
+            self.set_text_color(0, 0, 0)  # preto (#000000)
+            self.cell(0, 10, "Relatório de Aulas Cheias", ln=True, align='C')
+
+            self.set_font("Arial", "", 10)
+            self.set_text_color(80, 80, 80)
+            self.cell(0, 8, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ln=True, align='C')
+            self.ln(5)
+
+            # Linha separadora (#721c24)
+            self.set_draw_color(114, 28, 36)
+            self.set_line_width(0.8)
+            self.line(10, self.get_y(), 200, self.get_y())
+            self.ln(8)
+
+        def footer(self):
+            # Número da página
+            self.set_y(-15)
+            self.set_font("Arial", "I", 9)
+            self.set_text_color(80, 80, 80)
+            self.cell(0, 10, f"Página {self.page_no()}/{{nb}}", align='C')
+
+    pdf = PDF()
+    pdf.alias_nb_pages()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    # Cabeçalho da tabela — vermelho (#EF4444)
+    pdf.set_fill_color(239, 68, 68)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Arial", "B", 12)
+
+    col_widths = [20, 60, 25, 30, 50]
+    headers = ["ID", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+
+    for i in range(len(headers)):
+        pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
+    pdf.ln()
+
+    # Linhas da tabela
+    pdf.set_font("Arial", size=11)
+    pdf.set_text_color(0, 0, 0)  # preto (#000000)
+
+    fill = False
+    for aula in aulascheias:
+        if fill:
+            # Rosa claro (#F8D7DA)
+            pdf.set_fill_color(248, 215, 218)
+        else:
+            # Branco
+            pdf.set_fill_color(255, 255, 255)
+
+        pdf.cell(col_widths[0], 8, str(aula[0]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[2], 8, str(aula[2]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[3], 8, str(aula[3]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='L', fill=fill)
+
+        pdf.ln()
+        fill = not fill
+
+    pdf_path = "relatorio_aulas_cheias_professor.pdf"
+    pdf.output(pdf_path)
+    return send_file(pdf_path, as_attachment=True, mimetype='application/pdf')
+
+
+@app.route('/aulaslivres', methods=['GET'])
+def aulaslivres():
+    cursor = con.cursor()
+    cursor.execute(""" 
+        SELECT
+        A.ID_AULA,
+        A.NOME,
+        A.CAPACIDADE,
+        COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
+        M.MODA AS NOME_MODALIDADE
+    FROM
+        AULA A
+    LEFT JOIN
+        AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+    JOIN
+        MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
+    WHERE
+        M.ATIVO = 1 
+    GROUP BY
+        A.ID_AULA, A.NOME, A.CAPACIDADE, M.MODA
+    HAVING
+      COUNT(AA.ID_ALUNO) < A.CAPACIDADE;
+    """)
+    aulaslivres = cursor.fetchall()
+    cursor.close()
+
+    class PDF(FPDF):
+        def header(self):
+            # Título
+            self.set_font("Arial", "B", 16)
+            self.set_text_color(0, 0, 0)  # preto (#000000)
+            self.cell(0, 10, "Relatório de Aulas Livres", ln=True, align='C')
+
+            self.set_font("Arial", "", 10)
+            self.set_text_color(80, 80, 80)
+            self.cell(0, 8, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ln=True, align='C')
+            self.ln(5)
+
+            # Linha separadora  (#1ecca8)
+            self.set_draw_color(30, 204, 168)
+            self.set_line_width(0.8)
+            self.line(10, self.get_y(), 200, self.get_y())
+            self.ln(8)
+
+        def footer(self):
+            # Número da página
+            self.set_y(-15)
+            self.set_font("Arial", "I", 9)
+            self.set_text_color(80, 80, 80)
+            self.cell(0, 10, f"Página {self.page_no()}/{{nb}}", align='C')
+
+    pdf = PDF()
+    pdf.alias_nb_pages()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    pdf.set_fill_color(3, 190, 143)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Arial", "B", 12)
+
+    col_widths = [20, 60, 25, 30, 50]
+    headers = ["ID", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+
+    for i in range(len(headers)):
+        pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
+    pdf.ln()
+
+    # Linhas da tabela
+    pdf.set_font("Arial", size=11)
+    pdf.set_text_color(0, 0, 0)  # preto
+
+    fill = False
+    for aula in aulaslivres:
+        if fill:
+            # linha com leve verde claro (#00EDAC bem suave)
+            pdf.set_fill_color(0, 237, 172, 40)
+        else:
+            # branco
+            pdf.set_fill_color(255, 255, 255)
+
+        pdf.cell(col_widths[0], 8, str(aula[0]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[2], 8, str(aula[2]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[3], 8, str(aula[3]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='L', fill=fill)
+
+        pdf.ln()
+        fill = not fill
+
+    pdf_path = "relatorio_aulas_livres.pdf"
+    pdf.output(pdf_path)
+    return send_file(pdf_path, as_attachment=True, mimetype='application/pdf')
+
+@app.route('/aulascheias', methods=['GET'])
+def aulascheias():
+    cursor = con.cursor()
+    cursor.execute(""" 
+        SELECT
+        A.ID_AULA,
+        A.NOME,
+        A.CAPACIDADE,
+        COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
+        M.MODA AS NOME_MODALIDADE
+    FROM
+        AULA A
+    LEFT JOIN
+        AULA_ALUNO AA ON A.ID_AULA = AA.ID_AULA
+    JOIN
+        MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
+    WHERE
+        M.ATIVO = 1 
+    GROUP BY
+        A.ID_AULA, A.NOME, A.CAPACIDADE, M.MODA
+    HAVING
+      COUNT(AA.ID_ALUNO) = A.CAPACIDADE;
+    """)
+    aulascheias = cursor.fetchall()
+    cursor.close()
+
+    class PDF(FPDF):
+        def header(self):
+            # Título
+            self.set_font("Arial", "B", 16)
+            self.set_text_color(0, 0, 0)  # preto (#000000)
+            self.cell(0, 10, "Relatório de Aulas Cheias", ln=True, align='C')
+
+            self.set_font("Arial", "", 10)
+            self.set_text_color(80, 80, 80)
+            self.cell(0, 8, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ln=True, align='C')
+            self.ln(5)
+
+            # Linha separadora (#721c24)
+            self.set_draw_color(114, 28, 36)
+            self.set_line_width(0.8)
+            self.line(10, self.get_y(), 200, self.get_y())
+            self.ln(8)
+
+        def footer(self):
+            # Número da página
+            self.set_y(-15)
+            self.set_font("Arial", "I", 9)
+            self.set_text_color(80, 80, 80)
+            self.cell(0, 10, f"Página {self.page_no()}/{{nb}}", align='C')
+
+    pdf = PDF()
+    pdf.alias_nb_pages()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    # Cabeçalho da tabela — vermelho (#EF4444)
+    pdf.set_fill_color(239, 68, 68)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Arial", "B", 12)
+
+    col_widths = [20, 60, 25, 30, 50]
+    headers = ["ID", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+
+    for i in range(len(headers)):
+        pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
+    pdf.ln()
+
+    # Linhas da tabela
+    pdf.set_font("Arial", size=11)
+    pdf.set_text_color(0, 0, 0)  # preto (#000000)
+
+    fill = False
+    for aula in aulascheias:
+        if fill:
+            pdf.set_fill_color(248, 215, 218)
+        else:
+            pdf.set_fill_color(255, 255, 255)
+
+        pdf.cell(col_widths[0], 8, str(aula[0]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[2], 8, str(aula[2]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[3], 8, str(aula[3]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='L', fill=fill)
+
+        pdf.ln()
+        fill = not fill
+
+    pdf_path = "relatorio_aulas_cheias.pdf"
+    pdf.output(pdf_path)
+    return send_file(pdf_path, as_attachment=True, mimetype='application/pdf')
+
 
 @app.route('/cadastrar', methods=['POST'])
 def cadastrar():
