@@ -356,11 +356,13 @@ def alunoeditarconta():
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ? WHERE id_usuario = ?',
                            (nome_formatado, email, telefone, idaluno))
 
+            arquivo = request.files.get('img_perfil')
+            if arquivo and arquivo.filename != '':
+                arquivo.save(f'static/uploads/{idaluno}.jpg')
+
         session['nome'] = nome_formatado
 
         con.commit()
-        arquivo = request.files['img_perfil']
-        arquivo.save(f'static/uploads/{idaluno}.jpg')
         cursor.close()
 
         flash('Conta atualizada com sucesso!', 'success')
@@ -1605,11 +1607,12 @@ def admineditarconta():
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ? WHERE id_usuario = ?',
                            (nome_formatado, email, telefone, idadmin))
 
+            arquivo = request.files.get('img_perfil')
+            if arquivo and arquivo.filename != '':
+                arquivo.save(f'static/uploads/{idadmin}.jpg')
+
         session['nome'] = nome_formatado
         con.commit()
-
-        arquivo = request.files['img_perfil']
-        arquivo.save(f'static/uploads/{idadmin}.jpg')
 
         cursor.close()
 
@@ -1722,13 +1725,12 @@ def professoreditarconta():
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ? WHERE id_usuario = ?',
                            (nome_formatado, email, telefone, idprofessor))
 
+            arquivo = request.files.get('img_perfil')
+            if arquivo and arquivo.filename != '':
+                arquivo.save(f'static/uploads/{idprofessor}.jpg')
+
         session['nome'] = nome_formatado
         con.commit()
-
-
-        arquivo = request.files['img_perfil']
-        arquivo.save(f'static/uploads/{idprofessor}.jpg')
-
 
         cursor.close()
 
@@ -2132,7 +2134,7 @@ def aulaslivres():
     for aula in aulaslivres:
         if fill:
             # linha com leve verde claro (#00EDAC bem suave)
-            pdf.set_fill_color(0, 237, 172, 40)
+            pdf.set_fill_color(237, 172, 40)
         else:
             # branco
             pdf.set_fill_color(255, 255, 255)
@@ -2289,7 +2291,7 @@ def cadastrar():
     finally:
         cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
         idusuario = cursor.fetchone()[0]
-        arquivo = request.files['img_perfil']
+        arquivo = request.files['imgrel_perfil']
         arquivo.save(f'static/uploads/{idusuario}.jpg')
         cursor.close()
     flash("O usuario foi cadastrado com sucesso", 'success')
