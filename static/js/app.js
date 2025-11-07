@@ -18,6 +18,17 @@ if (btnMenuDash && menuMobileDash && headerDash) {
     });
 }
 
+function gerarRelatorio(selectElement) {
+
+    var url = selectElement.value;
+
+    if (url) {
+        window.location.href = url;
+
+        selectElement.selectedIndex = 0;
+    }
+}
+
 
 
 

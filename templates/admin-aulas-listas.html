@@ -92,8 +92,11 @@
              <h1>Aulas</h1>
             </div>
             <div class="lista-header_alternativa">
-                <a href="{{ url_for('aulascheias') }}" class="btn btn-deletar">Gerar Relatório de Aulas Cheias (PDF)</a>
-                <a href="{{ url_for('aulaslivres') }}" class="btn btn-editar">Gerar Relatório de Aulas livres (PDF)</a>
+            <select class="btn " onchange="gerarRelatorio(this)" >
+                <option value="" disabled selected>Gerar Relatório</option>
+                <option value="{{ url_for('aulascheias') }}">Relatório de Aulas Cheias</option>
+                <option value="{{ url_for('aulaslivres') }}">Relatório de Aulas Livres</option>
+            </select>
                 <a href="{{ url_for('adminadicionaraula') }}" class="btn btn-adicionar">Adicionar +</a>
             </div>
           </div>

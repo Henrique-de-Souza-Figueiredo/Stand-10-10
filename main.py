@@ -1903,7 +1903,7 @@ def aulaslivresprofessor():
             self.ln(5)
 
             # Linha separadora  (#1ecca8)
-            self.set_draw_color(30, 204, 168)
+            self.set_draw_color(44, 44, 44)
             self.set_line_width(0.8)
             self.line(10, self.get_y(), 200, self.get_y())
             self.ln(8)
@@ -1938,7 +1938,7 @@ def aulaslivresprofessor():
     fill = False
     for aula in aulaslivres:
         if fill:
-            pdf.set_fill_color(0, 237, 172, 40)
+            pdf.set_fill_color(200, 200, 200)
         else:
             # branco
             pdf.set_fill_color(255, 255, 255)
@@ -2039,8 +2039,7 @@ def aulascheiasprofessor():
     fill = False
     for aula in aulascheias:
         if fill:
-            # Rosa claro (#F8D7DA)
-            pdf.set_fill_color(248, 215, 218)
+            pdf.set_fill_color(200, 200, 200)
         else:
             # Branco
             pdf.set_fill_color(255, 255, 255)
@@ -2133,8 +2132,8 @@ def aulaslivres():
     fill = False
     for aula in aulaslivres:
         if fill:
-            # linha com leve verde claro (#00EDAC bem suave)
-            pdf.set_fill_color(237, 172, 40)
+
+            pdf.set_fill_color(200, 200, 200)
         else:
             # branco
             pdf.set_fill_color(255, 255, 255)
@@ -2227,7 +2226,7 @@ def aulascheias():
     fill = False
     for aula in aulascheias:
         if fill:
-            pdf.set_fill_color(248, 215, 218)
+            pdf.set_fill_color(200, 200, 200)
         else:
             pdf.set_fill_color(255, 255, 255)
 
