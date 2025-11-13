@@ -2365,10 +2365,10 @@ def cadastrar():
         session['nome'] = nome_formatado
 
         con.commit()
-    finally:
+    finally: #Colocar imagem de perfil
         cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
         idusuario = cursor.fetchone()[0]
-        arquivo = request.files['imgrel_perfil']
+        arquivo = request.files['img_perfil']
         arquivo.save(f'static/uploads/{idusuario}.jpg')
         cursor.close()
     flash("O usuario foi cadastrado com sucesso", 'success')
