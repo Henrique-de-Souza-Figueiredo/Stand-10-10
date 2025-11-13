@@ -167,23 +167,10 @@ def alunoaulaslista():
     cursor = con.cursor()
 
     if request.method == 'POST':
-
         id_aula = request.form['id_aula']
         acao = request.form['acao']
 
         if acao == 'inscrever':
-
-            cursor.execute("""
-                           SELECT 1 FROM AULA A
-                           JOIN MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
-                           WHERE A.ID_AULA = ? AND M.ATIVO = 1
-                           """, (id_aula,))
-            aula_ativa = cursor.fetchone()
-
-            if not aula_ativa:
-                flash('Não é possível se inscrever. Esta aula pertence a uma modalidade que foi desativada.', 'erro')
-                cursor.close()
-                return redirect(url_for('alunoaulaslista'))
 
             cursor.execute("SELECT DIA_SEMANA, HORARIO, HORARIO_FINAL FROM AULA WHERE ID_AULA = ?", (id_aula,))
             aula_alvo = cursor.fetchone()
@@ -209,8 +196,8 @@ def alunoaulaslista():
                 (id_aula,))
 
             resultado_vagas = cursor.fetchone()
-            capacidade_total = resultado_vagas[0] if resultado_vagas else 0
-            vagas_ocupadas = resultado_vagas[1] if resultado_vagas else 0
+            capacidade_total = resultado_vagas[0]
+            vagas_ocupadas = resultado_vagas[1]
             cursor.execute("SELECT 1 FROM AULA_ALUNO WHERE ID_ALUNO = ? AND ID_AULA = ?", (id_aluno, id_aula))
             ja_inscrito = cursor.fetchone()
 
@@ -289,14 +276,7 @@ def alunoaulaslista():
 
     cursor.close()
 
-    return render_template('aluno-aulas-lista.html',
-                           titulo='Dashboard aluno',
-                           inscricoes=inscricoes,
-                           aulas_segunda=aulas_segunda,
-                           aulas_terca=aulas_terca,
-                           aulas_quarta=aulas_quarta,
-                           aulas_quinta=aulas_quinta,
-                           aulas_sexta=aulas_sexta)
+    return render_template('aluno-aulas-lista.html',titulo='Dashboard aluno',inscricoes=inscricoes,aulas_segunda=aulas_segunda,aulas_terca=aulas_terca,aulas_quarta=aulas_quarta,aulas_quinta=aulas_quinta, aulas_sexta=aulas_sexta)
 
 
 
