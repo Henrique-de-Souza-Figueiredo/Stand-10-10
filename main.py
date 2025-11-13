@@ -2336,7 +2336,7 @@ def cadastrar():
         session['nome'] = nome_formatado
 
         con.commit()
-    finally: #Colocar imagem de perfil # Sprint
+    finally: #Sprint
         cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
         idusuario = cursor.fetchone()[0]
         arquivo = request.files['img_perfil']
