@@ -1872,16 +1872,18 @@ def aulaslivresprofessor():
 
     cursor = con.cursor()
     cursor.execute(""" 
-                SELECT
+        SELECT
             CASE A.DIA_SEMANA
                 WHEN 1 THEN 'Segunda'
                 WHEN 2 THEN 'Terça'
                 WHEN 3 THEN 'Quarta'
                 WHEN 4 THEN 'Quinta'
                 WHEN 5 THEN 'Sexta'
+                WHEN 6 THEN 'Sábado'
+                WHEN 7 THEN 'Domingo'
             END AS NOME_DIA_SEMANA,
-
-            A.ID_AULA,
+            A.HORARIO,
+            A.HORARIO_FINAL, 
             A.NOME,
             A.CAPACIDADE,
             COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
@@ -1894,17 +1896,18 @@ def aulaslivresprofessor():
             MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
         WHERE
             M.ATIVO = 1
-            AND A.PROFESSOR_ID = ?  
+            AND A.PROFESSOR_ID = ?
         GROUP BY
             A.DIA_SEMANA,
-            A.ID_AULA, 
+            A.HORARIO, 
+            A.HORARIO_FINAL,
             A.NOME, 
             A.CAPACIDADE, 
             M.MODA
         HAVING
             COUNT(AA.ID_ALUNO) < A.CAPACIDADE
         ORDER BY
-            A.DIA_SEMANA;  
+            A.DIA_SEMANA, A.HORARIO;
             """, (id_professor,))
     aulaslivres = cursor.fetchall()
     cursor.close()
@@ -1943,8 +1946,8 @@ def aulaslivresprofessor():
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Arial", "B", 12)
 
-    col_widths = [30, 60, 25, 30, 50]
-    headers = ["Dia da Semana", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+    col_widths = [30, 30, 30, 30, 20, 20, 30]
+    headers = ["Dia", "Início", "Fim", "Nome", "Cap.", "Ocp.", "Modalidade"]
 
     for i in range(len(headers)):
         pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
@@ -1963,10 +1966,12 @@ def aulaslivresprofessor():
             pdf.set_fill_color(255, 255, 255)
 
         pdf.cell(col_widths[0], 8, str(aula[0]), border=1, align='C', fill=fill)
-        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='C', fill=fill)
         pdf.cell(col_widths[2], 8, str(aula[2]), border=1, align='C', fill=fill)
         pdf.cell(col_widths[3], 8, str(aula[3]), border=1, align='C', fill=fill)
-        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[5], 8, str(aula[5]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[6], 8, str(aula[6]), border=1, align='C', fill=fill)
 
         pdf.ln()
         fill = not fill
@@ -1990,15 +1995,18 @@ def aulascheiasprofessor():
 
     cursor = con.cursor()
     cursor.execute(""" 
-        SELECT
+         SELECT
             CASE A.DIA_SEMANA
                 WHEN 1 THEN 'Segunda'
                 WHEN 2 THEN 'Terça'
                 WHEN 3 THEN 'Quarta'
                 WHEN 4 THEN 'Quinta'
                 WHEN 5 THEN 'Sexta'
+                WHEN 6 THEN 'Sábado'
+                WHEN 7 THEN 'Domingo'
             END AS NOME_DIA_SEMANA,
-            A.ID_AULA,
+            A.HORARIO,
+            A.HORARIO_FINAL, 
             A.NOME,
             A.CAPACIDADE,
             COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
@@ -2011,17 +2019,18 @@ def aulascheiasprofessor():
             MODALIDADES M ON A.ID_MODALIDADE = M.ID_MODALIDADE
         WHERE
             M.ATIVO = 1
-            AND A.PROFESSOR_ID = ?  
+            AND A.PROFESSOR_ID = ?
         GROUP BY
             A.DIA_SEMANA,
-            A.ID_AULA, 
+            A.HORARIO, 
+            A.HORARIO_FINAL,
             A.NOME, 
             A.CAPACIDADE, 
             M.MODA
         HAVING
-            COUNT(AA.ID_ALUNO) = A.CAPACIDADE  
+            COUNT(AA.ID_ALUNO) = A.CAPACIDADE
         ORDER BY
-            A.DIA_SEMANA;
+            A.DIA_SEMANA, A.HORARIO;
             """, (id_professor,))
 
     aulascheias = cursor.fetchall()
@@ -2062,8 +2071,8 @@ def aulascheiasprofessor():
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Arial", "B", 12)
 
-    col_widths = [30, 60, 25, 30, 50]
-    headers = ["Dia da Semana", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+    col_widths = [30, 30, 30, 30, 20, 20, 30]
+    headers = ["Dia", "Início", "Fim", "Nome", "Cap.", "Ocp.", "Modalidade"]
 
     for i in range(len(headers)):
         pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
@@ -2082,10 +2091,12 @@ def aulascheiasprofessor():
             pdf.set_fill_color(255, 255, 255)
 
         pdf.cell(col_widths[0], 8, str(aula[0]), border=1, align='C', fill=fill)
-        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='C', fill=fill)
         pdf.cell(col_widths[2], 8, str(aula[2]), border=1, align='C', fill=fill)
         pdf.cell(col_widths[3], 8, str(aula[3]), border=1, align='C', fill=fill)
-        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[5], 8, str(aula[5]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[6], 8, str(aula[6]), border=1, align='C', fill=fill)
 
         pdf.ln()
         fill = not fill
@@ -2099,15 +2110,18 @@ def aulascheiasprofessor():
 def aulaslivres():
     cursor = con.cursor()
     cursor.execute(""" 
-                    SELECT
+        SELECT
             CASE A.DIA_SEMANA
                 WHEN 1 THEN 'Segunda'
                 WHEN 2 THEN 'Terça'
                 WHEN 3 THEN 'Quarta'
                 WHEN 4 THEN 'Quinta'
                 WHEN 5 THEN 'Sexta'
+                WHEN 6 THEN 'Sábado'
+                WHEN 7 THEN 'Domingo'
             END AS NOME_DIA_SEMANA,
-            A.ID_AULA,
+            A.HORARIO,
+            A.HORARIO_FINAL, 
             A.NOME,
             A.CAPACIDADE,
             COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
@@ -2122,14 +2136,15 @@ def aulaslivres():
             M.ATIVO = 1
         GROUP BY
             A.DIA_SEMANA,
-            A.ID_AULA, 
+            A.HORARIO, 
+            A.HORARIO_FINAL,
             A.NOME, 
             A.CAPACIDADE, 
             M.MODA
         HAVING
             COUNT(AA.ID_ALUNO) < A.CAPACIDADE
         ORDER BY
-            A.DIA_SEMANA;
+            A.DIA_SEMANA, A.HORARIO;
     """)
     aulaslivres = cursor.fetchall()
     cursor.close()
@@ -2138,7 +2153,7 @@ def aulaslivres():
         def header(self):
             # Título
             self.set_font("Arial", "B", 16)
-            self.set_text_color(0, 0, 0)  # preto (#000000)
+            self.set_text_color(0, 0, 0)
             self.cell(0, 10, "Relatório de Aulas Livres", ln=True, align='C')
 
             self.set_font("Arial", "", 10)
@@ -2146,14 +2161,12 @@ def aulaslivres():
             self.cell(0, 8, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ln=True, align='C')
             self.ln(5)
 
-            # Linha separadora  (#1ecca8)
             self.set_draw_color(30, 204, 168)
             self.set_line_width(0.8)
             self.line(10, self.get_y(), 200, self.get_y())
             self.ln(8)
 
         def footer(self):
-            # Número da página
             self.set_y(-15)
             self.set_font("Arial", "I", 9)
             self.set_text_color(80, 80, 80)
@@ -2168,16 +2181,15 @@ def aulaslivres():
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Arial", "B", 12)
 
-    col_widths = [30, 60, 25, 30, 50]
-    headers = ["Dia da Semana", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+    col_widths = [30, 30, 30, 30, 20, 20, 30]
+    headers = ["Dia", "Início", "Fim", "Nome", "Cap.", "Ocp.", "Modalidade"]
 
     for i in range(len(headers)):
         pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
     pdf.ln()
 
-    # Linhas da tabela
     pdf.set_font("Arial", size=11)
-    pdf.set_text_color(0, 0, 0)  # preto
+    pdf.set_text_color(0, 0, 0)
 
     fill = False
     for aula in aulaslivres:
@@ -2185,14 +2197,15 @@ def aulaslivres():
 
             pdf.set_fill_color(200, 200, 200)
         else:
-            # branco
             pdf.set_fill_color(255, 255, 255)
 
         pdf.cell(col_widths[0], 8, str(aula[0]), border=1, align='C', fill=fill)
-        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='C', fill=fill)
         pdf.cell(col_widths[2], 8, str(aula[2]), border=1, align='C', fill=fill)
         pdf.cell(col_widths[3], 8, str(aula[3]), border=1, align='C', fill=fill)
-        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[5], 8, str(aula[5]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[6], 8, str(aula[6]), border=1, align='C', fill=fill)
 
         pdf.ln()
         fill = not fill
@@ -2200,6 +2213,7 @@ def aulaslivres():
     pdf_path = "relatorio_aulas_livres.pdf"
     pdf.output(pdf_path)
     return send_file(pdf_path, as_attachment=True, mimetype='application/pdf')
+
 
 @app.route('/aulascheias', methods=['GET'])
 def aulascheias():
@@ -2212,8 +2226,11 @@ def aulascheias():
                 WHEN 3 THEN 'Quarta'
                 WHEN 4 THEN 'Quinta'
                 WHEN 5 THEN 'Sexta'
+                WHEN 6 THEN 'Sábado'
+                WHEN 7 THEN 'Domingo'
             END AS NOME_DIA_SEMANA,
-            A.ID_AULA,
+            A.HORARIO,
+            A.HORARIO_FINAL, 
             A.NOME,
             A.CAPACIDADE,
             COUNT(AA.ID_ALUNO) AS VAGAS_OCUPADAS,
@@ -2228,23 +2245,23 @@ def aulascheias():
             M.ATIVO = 1
         GROUP BY
             A.DIA_SEMANA,
-            A.ID_AULA, 
+            A.HORARIO, 
+            A.HORARIO_FINAL,
             A.NOME, 
             A.CAPACIDADE, 
             M.MODA
         HAVING
             COUNT(AA.ID_ALUNO) = A.CAPACIDADE
         ORDER BY
-            A.DIA_SEMANA;
+            A.DIA_SEMANA, A.HORARIO;
     """)
     aulascheias = cursor.fetchall()
     cursor.close()
 
     class PDF(FPDF):
         def header(self):
-            # Título
             self.set_font("Arial", "B", 16)
-            self.set_text_color(0, 0, 0)  # preto (#000000)
+            self.set_text_color(0, 0, 0)
             self.cell(0, 10, "Relatório de Aulas Cheias", ln=True, align='C')
 
             self.set_font("Arial", "", 10)
@@ -2252,14 +2269,12 @@ def aulascheias():
             self.cell(0, 8, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ln=True, align='C')
             self.ln(5)
 
-            # Linha separadora (#721c24)
             self.set_draw_color(114, 28, 36)
             self.set_line_width(0.8)
             self.line(10, self.get_y(), 200, self.get_y())
             self.ln(8)
 
         def footer(self):
-            # Número da página
             self.set_y(-15)
             self.set_font("Arial", "I", 9)
             self.set_text_color(80, 80, 80)
@@ -2270,34 +2285,34 @@ def aulascheias():
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    # Cabeçalho da tabela — vermelho (#EF4444)
     pdf.set_fill_color(239, 68, 68)
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Arial", "B", 12)
 
-    col_widths = [30, 60, 25, 30, 50]
-    headers = ["Dia da Semana", "Nome da Aula", "Capacidade", "Ocupadas", "Modalidade"]
+    col_widths = [30, 30, 30, 30, 20, 20, 30]
+    headers = ["Dia", "Início", "Fim", "Nome", "Cap.", "Ocp.", "Modalidade"]
 
     for i in range(len(headers)):
         pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
     pdf.ln()
 
-    # Linhas da tabela
     pdf.set_font("Arial", size=11)
-    pdf.set_text_color(0, 0, 0)  # preto (#000000)
+    pdf.set_text_color(0, 0, 0)
 
     fill = False
     for aula in aulascheias:
         if fill:
-            pdf.set_fill_color(200, 200, 200)
+            pdf.set_fill_color(220, 220, 220)
         else:
             pdf.set_fill_color(255, 255, 255)
 
         pdf.cell(col_widths[0], 8, str(aula[0]), border=1, align='C', fill=fill)
-        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[1], 8, str(aula[1]), border=1, align='C', fill=fill)
         pdf.cell(col_widths[2], 8, str(aula[2]), border=1, align='C', fill=fill)
         pdf.cell(col_widths[3], 8, str(aula[3]), border=1, align='C', fill=fill)
-        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='L', fill=fill)
+        pdf.cell(col_widths[4], 8, str(aula[4]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[5], 8, str(aula[5]), border=1, align='C', fill=fill)
+        pdf.cell(col_widths[6], 8, str(aula[6]), border=1, align='C', fill=fill)
 
         pdf.ln()
         fill = not fill
