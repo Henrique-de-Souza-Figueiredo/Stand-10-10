@@ -116,7 +116,7 @@
                 </div>
                   <div class="item-texto">
                       <div class="item-actions">
-                    <form action="{{ url_for('alunoaulaslista') }}" method="POST" style="display:inline;">
+                    <form action="{{ url_for('alunoaulaslista') }}" method="POST">
 
     <input type="hidden" name="id_aula" value="{{ aula[0] }}">
     {% if aula[0] in inscricoes %}
@@ -165,7 +165,7 @@
                 </div>
                 <div class="item-texto">
                       <div class="item-actions">
-                    <form action="{{ url_for('alunoaulaslista') }}" method="POST" style="display:inline;">
+                    <form action="{{ url_for('alunoaulaslista') }}" method="POST">
                         <input type="hidden" name="id_aula" value="{{ aula[0] }}">
                         {% if aula[0] in inscricoes %}
                             <input type="hidden" name="acao" value="desinscrever">
@@ -212,7 +212,7 @@
                 </div>
                 <div class="item-texto">
                       <div class="item-actions">
-                    <form action="{{ url_for('alunoaulaslista') }}" method="POST" style="display:inline;">
+                    <form action="{{ url_for('alunoaulaslista') }}" method="POST">
                         <input type="hidden" name="id_aula" value="{{ aula[0] }}">
                         {% if aula[0] in inscricoes %}
                             <input type="hidden" name="acao" value="desinscrever">
@@ -259,7 +259,7 @@
                 </div>
                 <div class="item-texto">
                       <div class="item-actions">
-                    <form action="{{ url_for('alunoaulaslista') }}" method="POST" style="display:inline;">
+                    <form action="{{ url_for('alunoaulaslista') }}" method="POST" >
                         <input type="hidden" name="id_aula" value="{{ aula[0] }}">
                         {% if aula[0] in inscricoes %}
                             <input type="hidden" name="acao" value="desinscrever">
@@ -306,7 +306,7 @@
                 </div>
                 <div class="item-texto">
                       <div class="item-actions">
-                    <form action="{{ url_for('alunoaulaslista') }}" method="POST" style="display:inline;">
+                    <form action="{{ url_for('alunoaulaslista') }}" method="POST" >
                         <input type="hidden" name="id_aula" value="{{ aula[0] }}">
                         {% if aula[0] in inscricoes %}
                             <input type="hidden" name="acao" value="desinscrever">

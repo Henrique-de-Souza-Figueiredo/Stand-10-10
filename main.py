@@ -153,7 +153,7 @@ def alunoavisos():
     return render_template('aluno-avisos.html', avisoli=avisoli, titulo='Dashboard aluno lista aviso')
 
 
-@app.route('/alunoaulaslista', methods=['GET', 'POST'])
+@app.route('/alunoaulaslista', methods=['GET', 'POST']) # Sprint
 def alunoaulaslista():
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
@@ -1607,7 +1607,7 @@ def admineditarconta():
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ? WHERE id_usuario = ?',
                            (nome_formatado, email, telefone, idadmin))
 
-            arquivo = request.files.get('img_perfil')
+            arquivo = request.files.get('img_perfil') # Sprint
             if arquivo and arquivo.filename != '':
                 arquivo.save(f'static/uploads/{idadmin}.jpg')
 
@@ -1858,7 +1858,7 @@ def professoralunosmatriculados(aula_id):
 
     return render_template('professor-alunos-matriculados.html', aula=aula, alunosmatriculado=alunosmatriculado, titulo='Dashboard professor alunos matriculados')
 
-@app.route('/aulaslivresprofessor', methods=['GET'])
+@app.route('/aulaslivresprofessor', methods=['GET']) # Sprint
 def aulaslivresprofessor():
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
@@ -1879,8 +1879,6 @@ def aulaslivresprofessor():
                 WHEN 3 THEN 'Quarta'
                 WHEN 4 THEN 'Quinta'
                 WHEN 5 THEN 'Sexta'
-                WHEN 6 THEN 'Sábado'
-                WHEN 7 THEN 'Domingo'
             END AS NOME_DIA_SEMANA,
             A.HORARIO,
             A.HORARIO_FINAL, 
@@ -1981,7 +1979,7 @@ def aulaslivresprofessor():
     return send_file(pdf_path, as_attachment=True, mimetype='application/pdf')
 
 
-@app.route('/aulascheiasprofessor', methods=['GET'])
+@app.route('/aulascheiasprofessor', methods=['GET']) # Sprint
 def aulascheiasprofessor():
     if 'id_usuario' not in session:
         flash('Você precisa estar logado para acessar essa página.', 'erro')
@@ -2002,8 +2000,6 @@ def aulascheiasprofessor():
                 WHEN 3 THEN 'Quarta'
                 WHEN 4 THEN 'Quinta'
                 WHEN 5 THEN 'Sexta'
-                WHEN 6 THEN 'Sábado'
-                WHEN 7 THEN 'Domingo'
             END AS NOME_DIA_SEMANA,
             A.HORARIO,
             A.HORARIO_FINAL, 
@@ -2078,9 +2074,8 @@ def aulascheiasprofessor():
         pdf.cell(col_widths[i], 10, headers[i], border=1, align='C', fill=True)
     pdf.ln()
 
-    # Linhas da tabela
     pdf.set_font("Arial", size=11)
-    pdf.set_text_color(0, 0, 0)  # preto (#000000)
+    pdf.set_text_color(0, 0, 0)
 
     fill = False
     for aula in aulascheias:
@@ -2106,7 +2101,7 @@ def aulascheiasprofessor():
     return send_file(pdf_path, as_attachment=True, mimetype='application/pdf')
 
 
-@app.route('/aulaslivres', methods=['GET'])
+@app.route('/aulaslivres', methods=['GET']) # Sprint
 def aulaslivres():
     cursor = con.cursor()
     cursor.execute(""" 
@@ -2117,8 +2112,6 @@ def aulaslivres():
                 WHEN 3 THEN 'Quarta'
                 WHEN 4 THEN 'Quinta'
                 WHEN 5 THEN 'Sexta'
-                WHEN 6 THEN 'Sábado'
-                WHEN 7 THEN 'Domingo'
             END AS NOME_DIA_SEMANA,
             A.HORARIO,
             A.HORARIO_FINAL, 
@@ -2215,7 +2208,7 @@ def aulaslivres():
     return send_file(pdf_path, as_attachment=True, mimetype='application/pdf')
 
 
-@app.route('/aulascheias', methods=['GET'])
+@app.route('/aulascheias', methods=['GET']) # Sprint
 def aulascheias():
     cursor = con.cursor()
     cursor.execute(""" 
@@ -2226,8 +2219,6 @@ def aulascheias():
                 WHEN 3 THEN 'Quarta'
                 WHEN 4 THEN 'Quinta'
                 WHEN 5 THEN 'Sexta'
-                WHEN 6 THEN 'Sábado'
-                WHEN 7 THEN 'Domingo'
             END AS NOME_DIA_SEMANA,
             A.HORARIO,
             A.HORARIO_FINAL, 
@@ -2365,7 +2356,7 @@ def cadastrar():
         session['nome'] = nome_formatado
 
         con.commit()
-    finally: #Colocar imagem de perfil
+    finally: #Colocar imagem de perfil # Sprint
         cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
         idusuario = cursor.fetchone()[0]
         arquivo = request.files['img_perfil']
