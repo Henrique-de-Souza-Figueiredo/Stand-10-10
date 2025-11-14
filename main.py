@@ -263,7 +263,7 @@ def alunoaulaslista():
         vagas_ocupadas = aula[9]
         aula_id = aula[0]
 
-        if (vagas_ocupadas < capacidade_total) or (aula_id in inscricoes):
+        if (vagas_ocupadas < capacidade_total) or (aula_id in inscricoes): #sprint
 
             dia = aula[3]
             if dia == 1:
