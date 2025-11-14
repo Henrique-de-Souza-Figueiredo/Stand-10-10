@@ -15,7 +15,7 @@ password = 'sysdba'
 
 con = fdb.connect(host=host, database=database, user=user, password=password)
 
-ALLOWED_EXTENSIONS = {'jpg'}
+ALLOWED_EXTENSIONS = {'jpg'} #sprint
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
