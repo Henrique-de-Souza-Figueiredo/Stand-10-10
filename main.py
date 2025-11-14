@@ -15,6 +15,10 @@ password = 'sysdba'
 
 con = fdb.connect(host=host, database=database, user=user, password=password)
 
+ALLOWED_EXTENSIONS = {'jpg'}
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -336,9 +340,17 @@ def alunoeditarconta():
             cursor.execute('UPDATE usuario SET nome = ?, email = ?, telefone = ? WHERE id_usuario = ?',
                            (nome_formatado, email, telefone, idaluno))
 
-            arquivo = request.files.get('img_perfil')
-            if arquivo and arquivo.filename != '':
+
+        arquivo = request.files.get('img_perfil')
+        if arquivo and arquivo.filename != '':
+
+            if allowed_file(arquivo.filename):
                 arquivo.save(f'static/uploads/{idaluno}.jpg')
+            else:
+                flash("Arquivo inválido. Por favor, envie apenas .jpg", 'error')
+                con.rollback()
+                return redirect(url_for('alunoeditarconta'))
+
 
         session['nome'] = nome_formatado
 
@@ -1589,8 +1601,13 @@ def admineditarconta():
 
             arquivo = request.files.get('img_perfil') # Sprint
             if arquivo and arquivo.filename != '':
-                arquivo.save(f'static/uploads/{idadmin}.jpg')
 
+                if allowed_file(arquivo.filename):
+                    arquivo.save(f'static/uploads/{idadmin}.jpg')
+                else:
+                    flash("Arquivo inválido. Por favor, envie apenas .jpg", 'error')
+                    con.rollback()
+                    return redirect(url_for('admineditarconta'))
         session['nome'] = nome_formatado
         con.commit()
 
@@ -1707,7 +1724,13 @@ def professoreditarconta():
 
             arquivo = request.files.get('img_perfil')
             if arquivo and arquivo.filename != '':
-                arquivo.save(f'static/uploads/{idprofessor}.jpg')
+
+                if allowed_file(arquivo.filename):
+                    arquivo.save(f'static/uploads/{idprofessor}.jpg')
+                else:
+                    flash("Arquivo inválido. Por favor, envie apenas .jpg", 'error')
+                    con.rollback()
+                    return redirect(url_for('professoreditarconta'))
 
         session['nome'] = nome_formatado
         con.commit()
@@ -2319,10 +2342,13 @@ def cadastrar():
             caracterEspecial = True
 
     if not (maiusculo and minuscula and numero and caracterEspecial):
-        flash("Sua senha deve ter uma Letra maiuscula, uma letra minuscula, um caractere especial e um numero")
-        return render_template("cadastro.html")
+        flash("Sua senha deve ter uma Letra maiuscula, uma letra minuscula, um caractere especial e um numero", 'error')
+
+        return redirect(url_for('cadastro'))
 
     senha_criptografada = generate_password_hash(senha).decode('utf-8')
+
+    cursor = None
 
     try:
         cursor = con.cursor()
@@ -2330,18 +2356,32 @@ def cadastrar():
         if cursor.fetchone():
             flash("Esse email já está cadastrado", 'error')
             return redirect(url_for('cadastro'))
+
         cursor.execute("insert into usuario(nome, email,telefone, senha, tipo,tentativas) values(?,?,?,?,1,0)",
                        (nome_formatado, email, telefone, senha_criptografada))
 
         session['nome'] = nome_formatado
 
-        con.commit()
-    finally: #Sprint
         cursor.execute("SELECT id_usuario FROM usuario WHERE email = ?", (email,))
         idusuario = cursor.fetchone()[0]
-        arquivo = request.files['img_perfil']
-        arquivo.save(f'static/uploads/{idusuario}.jpg')
-        cursor.close()
+
+        arquivo = request.files.get('img_perfil')
+        if arquivo and arquivo.filename != '':
+
+            if allowed_file(arquivo.filename):
+
+                arquivo.save(f'static/uploads/{idusuario}.jpg')
+            else:
+                flash("Arquivo inválido. Por favor, envie apenas .jpg", 'error')
+                con.rollback()
+                return redirect(url_for('cadastro'))
+
+        con.commit()
+
+    finally:
+        if cursor:
+            cursor.close()
+
     flash("O usuario foi cadastrado com sucesso", 'success')
     return redirect(url_for('login'))
 
