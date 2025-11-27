@@ -173,6 +173,10 @@
 
 @media (max-width: 426px) {
 
+    .lista-header_alternativa{
+     display:block
+    }
+
     .dia-titulo {
         font-size: 1.3rem;      /* Significativamente menor */
         text-align: center;     /* Centraliza o título no mobile */
@@ -380,6 +384,12 @@
         border-radius: 5px;
     }
 
+    select {
+        width: 96%;
+        font-size: 14px;
+        border-radius: 5px;
+    }
+
     .formulario button {
         height: 35px;
         border-radius: 10px;
@@ -476,9 +486,6 @@
         text-align: center;
     }
 
-    .lista-header h1 {
-        margin-right: 20px;
-    }
 
 
     .container-excluir {

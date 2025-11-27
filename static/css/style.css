@@ -773,9 +773,11 @@ h5 {
 
 .lista-header_alternativa {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
-    margin-bottom: var(--esp-xl);
+}
+
+.lista-header_alternativa select {
+    width: 200px;
 }
 
 
@@ -835,7 +837,6 @@ h5 {
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-block;
-    min-width: 110px;
     margin: 3px;
 }
 
