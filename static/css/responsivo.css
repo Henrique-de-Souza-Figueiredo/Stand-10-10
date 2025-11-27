@@ -200,6 +200,10 @@
 
 @media (max-width: 426px) {
 
+    .possui{
+        font-size: 0.9rem;
+    }
+
     .lista-header_alternativa{
      display:block
     }
