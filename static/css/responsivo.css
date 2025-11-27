@@ -422,6 +422,7 @@
     }
 
     .formulario button {
+        width: 96%;
         height: 35px;
         border-radius: 10px;
     }
