@@ -525,6 +525,8 @@ def adminexcluiralunos(id):
         return redirect(url_for('login'))
 
     cursor = con.cursor()
+
+    # Busca dados para exibir na tela de confirmação
     cursor.execute("SELECT nome, email FROM usuario WHERE id_usuario = ?", (id,))
     usuario = cursor.fetchone()
 
@@ -538,10 +540,23 @@ def adminexcluiralunos(id):
     if request.method == 'POST':
         confirmar = request.form.get('confirmar')
         if confirmar == 'sim':
+
+            cursor.execute("SELECT COUNT(*) FROM AULA_ALUNO WHERE ID_ALUNO = ?", (id,))
+            quantidade_inscricoes = cursor.fetchone()[0]
+
+            if quantidade_inscricoes > 0:
+                flash(
+                    f"O aluno está inscrito em aulas não é possivel excluir",
+                    'erro')
+                cursor.close()
+                return redirect(url_for('adminalunoslista'))
+
             cursor.execute("DELETE FROM usuario WHERE id_usuario = ?", (id,))
+
             con.commit()
+            flash(f" Aluno foi excluído com sucesso.", 'success')
+
             cursor.close()
-            flash(f"O aluno '{nome}' foi excluído com sucesso.", 'success')
             return redirect(url_for('adminalunoslista'))
 
     cursor.close()
