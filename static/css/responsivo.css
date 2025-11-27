@@ -254,6 +254,7 @@
 
     .quem-somos {
         display: block;
+        text-align: center;
         padding: 20px 0; /* Corrigido de 'auto' para '0' */
     }
 
