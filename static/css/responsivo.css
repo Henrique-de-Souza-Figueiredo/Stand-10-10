@@ -200,40 +200,37 @@
 
 @media (max-width: 426px) {
 
-    .possui{
-        font-size: 0.9rem;
-    }
-
-    .lista-header_alternativa{
-     display:block
-    }
-
-    .dia-titulo {
-        font-size: 1.3rem;      /* Significativamente menor */
-        text-align: center;     /* Centraliza o título no mobile */
-        margin-top: 20px;
-        margin-bottom: 10px;
-    }
-
-    /* Ajusta a mensagem de "sem aulas" */
-    .sem-aulas {
-        font-size: 0.95rem;     /* Diminui a fonte da mensagem */
-        padding: 15px 10px;     /* Adiciona um leve padding lateral */
-    }
-
-    /* Diminui a margem do separador */
-    .separador-dia {
-        margin: 20px 0;
-    }
-
-    /* Home */
-
-    html,
-    body {
+    /* --- Ajustes Gerais --- */
+    html, body {
         max-width: 100vw;
         overflow-x: hidden;
     }
 
+    .possui {
+        font-size: 0.9rem;
+    }
+
+    .lista-header_alternativa {
+        display: block;
+    }
+
+    .dia-titulo {
+        font-size: 1.3rem;
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    .sem-aulas {
+        font-size: 0.95rem;
+        padding: 15px 10px;
+    }
+
+    .separador-dia {
+        margin: 20px 0;
+    }
+
+    /* --- Home --- */
     .main-banner h1 {
         font-size: 1.5rem;
     }
@@ -257,7 +254,7 @@
 
     .quem-somos {
         display: block;
-        padding: 20px auto;
+        padding: 20px 0; /* Corrigido de 'auto' para '0' */
     }
 
     .quem-somos p {
@@ -268,76 +265,11 @@
         display: none;
     }
 
+    /* --- Menu Mobile (Bloco Unificado) --- */
     .menu-mobile {
         font-family: "Poppins", sans-serif;
         font-weight: 500;
         font-style: normal;
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 70%;
-        height: 100vh;
-        background: #fff;
-        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-        transition: right 0.3s ease;
-        padding: 80px var(--esp-md) var(--esp-md);
-        z-index: 999;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .menu-mobile.aberto {
-        right: 0;
-    }
-
-    .menu-mobile ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: var(--esp-sm);
-    }
-
-    .menu-mobile ul li a {
-        display: block;
-        text-align: center;
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: var(--cor-preto);
-        text-decoration: none;
-        border: 2px solid var(--cor-principal);
-        border-radius: 8px;
-        padding: var(--esp-sm);
-        transition: all 0.3s ease;
-    }
-
-    .menu-hamburguer {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        width: 30px;
-        height: 22px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0;
-        z-index: 1001;
-        transition: all 0.3s ease;
-    }
-
-    .menu-hamburguer span {
-        display: block;
-        height: 4px;
-        width: 100%;
-        background-color: var(--cor-preto);
-        border-radius: 2px;
-        transition: all 0.3s ease;
-    }
-
-    /* formulario */
-
-    .menu-mobile {
         position: fixed;
         top: 0;
         right: -100%;
@@ -378,6 +310,13 @@
         transition: all 0.3s ease;
     }
 
+    .menu-mobile .scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 60px;
+    }
+
+    /* Botão Hamburguer */
     .menu-hamburguer {
         display: flex;
         flex-direction: column;
@@ -401,6 +340,75 @@
         transition: all 0.3s ease;
     }
 
+    /* --- Dashboard Mobile Específico --- */
+    .container-dashboard {
+        display: none;
+    }
+
+    .menu-mobile-dashboard {
+        background-color: var(--cor-fundo);
+    }
+
+    .menu-mobile-dashboard ul li a {
+        border: 2px solid var(--cor-ativado);
+        color: var(--cor-branco);
+        background-color: var(--cor-ativado);
+    }
+
+    .menu-mobile-dashboard ul li a.active-mobile {
+        background-color: var(--cor-secundario);
+        border-color: var(--cor-secundario);
+        color: var(--cor-branco);
+    }
+
+    .menu-mobile-dashboard ul li a:hover {
+        background-color: #17c290;
+        border-color: #17c290;
+        color: var(--cor-branco);
+    }
+
+    /* --- Listas e Cards no Mobile --- */
+    .info-grid {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+        gap: var(--esp-xs);
+    }
+
+    .main-content header {
+        text-align: center;
+    }
+
+    .lista-header {
+        display: block;
+        text-align: center;
+    }
+
+    .lista-item {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--esp-sm);
+    }
+
+    .item-name {
+        text-align: center;
+    }
+
+    /* Botões empilhados no mobile */
+    .item-actions {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .item-actions a {
+        width: 100%;
+        text-align: center;
+        margin-left: 0;
+        box-sizing: border-box;
+    }
+
+    /* --- Formulários --- */
     .formulario {
         width: 90%;
         padding: var(--esp-sm) 0;
@@ -436,116 +444,29 @@
         font-size: 18px;
     }
 
-    /* dashboard */
-
-    .container-dashboard {
-        display: none;
-    }
-
-    .menu-mobile-dashboard {
-        background-color: var(--cor-fundo);
-    }
-
-    .active-mobile {
-        background-color: var(--cor-ativado);
-    }
-
-
-    .menu-mobile-dashboard {
-        background-color: var(--cor-fundo);
-    }
-
-    .menu-mobile-dashboard ul li a {
-        border: 2px solid var(--cor-ativado);
-        color: var(--cor-branco);
-        background-color: var(--cor-ativado);
-    }
-
-    .menu-mobile-dashboard ul li a.active-mobile {
-        background-color: var(--cor-secundario);
-        border-color: var(--cor-secundario);
-        color: var(--cor-branco);
-    }
-
-    .menu-mobile-dashboard ul li a:hover {
-        background-color: #17c290;
-        border-color: #17c290;
-        color: var(--cor-branco);
-    }
-
-    .menu-mobile .scroll {
-        flex: 1;
-        overflow-y: auto;
-        padding-bottom: 60px;
-    }
-
-    .info-grid {
-        grid-template-columns: 1fr;
-        max-width: 500px;
-        gap: var(--esp-xs);
-    }
-
-    .main-content header {
-        text-align: center;
-    }
-
-    .lista-item {
-        flex-direction: column;
-        align-items: center;
-        gap: var(--esp-sm);
-
-    }
-
-
-
-    .item-name {
-        text-align: center;
-    }
-
-    .item-actions {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        gap: 10px;
-    }
-
-    .item-actions a {
-        width: 100%;
-        text-align: center;
-        margin-left: 0;
-        box-sizing: border-box;
-    }
-
-    .lista-header {
-        display: block;
-        text-align: center;
-    }
-
-
+    /* --- Páginas de Exclusão --- */
     .container-excluir {
         padding: 20px;
         width: 100%;
-
     }
 
     .container-excluir h1 {
         font-size: 1.5em;
     }
 
-
-
-
     .btn-confirm {
         box-sizing: border-box;
     }
 }
 
+/* =========================================
+   CELULAR PEQUENO (Até 321px)
+   ========================================= */
 @media (max-width: 321px) {
     .container-excluir {
         padding: 30px;
-        width: 128%;
+        width: 128%; /* Mantido conforme original, embora alto */
     }
-
 
     .botoes-excluir {
         margin-top: 10px;
