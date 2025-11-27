@@ -50,10 +50,12 @@
 
 /* TABLET */
 
+/* =========================================
+   TABLET (427px até 769px)
+   ========================================= */
 @media (min-width: 427px) and (max-width: 769px) {
 
-    /* dashboard */
-
+    /* --- Ajustes Gerais do Dashboard --- */
     .info-grid {
         grid-template-columns: 1fr;
         max-width: 500px;
@@ -71,8 +73,10 @@
 
     .lista-container {
         margin: var(--esp-xl) var(--esp-md);
+        width: auto;
     }
 
+    /* Cabeçalho da Lista (Título e Filtros) */
     .lista-header {
         flex-direction: column;
         gap: var(--esp-md);
@@ -83,37 +87,83 @@
         width: 100%;
     }
 
-    .diasemana {
-        max-width: 450px;
-        margin-left: auto;
-        margin-right: auto;
+    .lista-scroll {
+        width: 100%;
+        overflow-x: hidden;
     }
 
+    /* --- CORREÇÃO DO CARD (Lista de Aulas) --- */
     .lista-item {
-        flex-direction: row;
+        display: flex;
+        flex-wrap: wrap; /* Permite que os itens de texto quebrem linha */
         justify-content: space-between;
-        align-items: center;
-        max-width: 450px;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: var(--esp-xs);
-        padding: var(--esp-sm);
+        align-items: flex-start;
+        width: 100%;
+        max-width: 650px; /* Largura controlada para o card não ficar gigante */
+        margin: 0 auto var(--esp-sm) auto; /* Centraliza o card */
+        padding: var(--esp-md);
+        box-sizing: border-box;
+        gap: 15px;
     }
 
+    /* Textos (Nome, Horário, Professor) divididos em 2 colunas */
+    .item-texto {
+        width: 48%;
+        min-width: 150px;
+    }
+
+    /* Remove imagens dentro da lista para economizar espaço */
+    .lista-item img {
+        display: none;
+    }
+
+    /* --- CORREÇÃO DOS BOTÕES --- */
+    /* 1. Seleciona o último item-texto (que contém os botões) e força ele a ocupar a linha toda */
+    .lista-item .item-texto:last-child {
+        width: 100%;
+        margin-top: 10px; /* Dá um respiro dos textos acima */
+    }
+
+    /* 2. O container flexível dos botões */
     .item-actions {
-        flex-direction: row;
-        gap: var(--esp-xxs);
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        gap: 10px;
     }
 
-    .lista-item .btn {
-        font-size: 0.8em;
-        padding: var(--espacamento-btn-mobile);
-        min-width: auto;
-        font-weight: 500;
+    /* 3. Estilo dos botões individuais */
+    .item-actions .btn {
+        flex: 1; /* Faz os 3 botões dividirem o espaço igualmente */
+        padding: 12px 0; /* Padding vertical confortável, horizontal automático */
+        min-width: auto; /* Remove largura fixa que quebrava o layout */
+        font-size: 0.9rem;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        white-space: nowrap; /* Tenta manter o texto em uma linha */
     }
 
-    /* home */
+    /* --- Títulos e Espaçamentos --- */
+    .dia-titulo {
+        text-align: center;
+        font-size: 1.6rem;
+        margin-top: 22px;
+        margin-bottom: 12px;
+    }
 
+    .sem-aulas {
+        font-size: 1.1rem;
+        padding: 18px 0;
+        text-align: center;
+    }
+
+    .separador-dia {
+        margin: 25px 0;
+    }
+
+    /* --- Home / Banner (Mantido do original) --- */
     .main-banner h1 {
         font-size: 3rem;
     }
@@ -138,35 +188,12 @@
         line-height: 1.5;
     }
 
-    .menu-hamburguer {
-        display: none;
-    }
-
-    .menu-mobile {
-        display: none;
-    }
-
+    /* Esconde menu mobile desktop */
+    .menu-hamburguer,
+    .menu-mobile,
     .menu-mobile.aberto {
         display: none;
     }
-
-    .dia-titulo {
-        font-size: 1.6rem;      /* Um pouco menor que o desktop */
-        margin-top: 22px;
-        margin-bottom: 12px;
-    }
-
-    /* Ajusta a mensagem de "sem aulas" */
-    .sem-aulas {
-        font-size: 1.1rem;      /* Mantém o tamanho do desktop */
-        padding: 18px 0;
-    }
-
-    /* Diminui a margem do separador */
-    .separador-dia {
-        margin: 25px 0;
-    }
-
 }
 
 /* CELULAR */
@@ -461,7 +488,10 @@
         flex-direction: column;
         align-items: center;
         gap: var(--esp-sm);
+
     }
+
+
 
     .item-name {
         text-align: center;
@@ -485,7 +515,6 @@
         display: block;
         text-align: center;
     }
-
 
 
     .container-excluir {
