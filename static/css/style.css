@@ -803,14 +803,10 @@ h5 {
 
 
 .item-name {
-    margin: 0;
     font-size: 1.2em;
+    padding-bottom: 3px;
 }
 
-.item-descricao {
-    margin-top: 10px;
-
-}
 
 
 .item-actions {
